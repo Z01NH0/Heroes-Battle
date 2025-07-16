@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heroes Battle</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #222;
+        }
+        
+        #canvas {
+            display: block;
+            background-color: #111;
+        }
+        
+        #menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        #title {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #f0f0f0;
+            text-shadow: 0 0 10px #fff;
+        }
+        
+        .character-select {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .character {
+            width: 150px;
+            height: 200px;
+            background-color: #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .character:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #555;
+        }
+        
+        .character.selected {
+            background-color: #444;
+            box-shadow: 0 0 20px #fff;
+        }
+        
+        .character-icon {
+            width: 100px;
+            height: 100px;
+            background-color: #555;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+        }
+        
+        .character-name {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .character-desc {
+            font-size: 12px;
+            text-align: center;
+            color: #aaa;
+        }
+        
+        #startButton {
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #startButton:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        
+        #gameUI {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 18px;
+            z-index: 5;
+            display: none;
+        }
+        
+        #healthBar {
+            width: 200px;
+            height: 20px;
+            background-color: #333;
+            border: 2px solid #555;
+            margin-bottom: 5px;
+        }
+        
+        #healthFill {
+            height: 100%;
+            width: 100%;
+            background-color: #f00;
+            transition: width 0.3s;
+        }
+        
+        #specialBar {
+            width: 200px;
+            height: 15px;
+            background-color: #333;
+            border: 2px solid #555;
+            margin-top: 10px;
+        }
+        
+        #specialFill {
+            height: 100%;
+            width: 0%;
+            background-color: #00f;
+            transition: width 0.3s;
+        }
+        
+        #score {
+            margin-top: 10px;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 20;
+        }
+        
+        #gameOver h1 {
+            font-size: 48px;
+            color: #f00;
+            margin-bottom: 20px;
+        }
+        
+        #finalScore {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        #restartButton {
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #restartButton:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="canvas"></canvas>
+        
+        <div id="gameUI">
+            <div id="healthBar">
+                <div id="healthFill"></div>
+            </div>
+            <div id="score">Score: 0</div>
+            <div id="specialBar">
+                <div id="specialFill"></div>
+            </div>
+        </div>
+        
+        <div id="menu">
+            <h1 id="title">Heroes Battle</h1>
+            <div class="character-select">
+                <div class="character" data-character="fireMage">
+                    <div class="character-icon">🔥</div>
+                    <div class="character-name">Mago de Fogo</div>
+                    <div class="character-desc">Atira bolas de fogo que causam queimadura. Especial: Explosão de fogo em todas as direções.</div>
+                </div>
+                <div class="character" data-character="archer">
+                    <div class="character-icon">🏹</div>
+                    <div class="character-name">Arqueiro Real</div>
+                    <div class="character-desc">Atira flechas rapidamente. Especial: Chuva de flechas com dash para trás.</div>
+                </div>
+                <div class="character" data-character="knight">
+                    <div class="character-icon">⚔️</div>
+                    <div class="character-name">Cavaleiro Negro</div>
+                    <div class="character-desc">Atira três projéteis de uma vez. Especial: Invulnerabilidade e espada corpo-a-corpo.</div>
+                </div>
+            </div>
+            <button id="startButton">Começar Jogo</button>
+            <div class="instructions">
+                Controles: Mouse para mirar | Clique para atirar | Tecla E para habilidade especial
+            </div>
+        </div>
+        
+        <div id="gameOver">
+            <h1>Game Over</h1>
+            <div id="finalScore">Score: 0</div>
+            <button id="restartButton">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        // Configurações do jogo
+        const config = {
+            width: 800,
+            height: 600,
+            playerSpeed: 5,
+            playerSize: 20,
+            enemySpawnRate: 1000, // 1 segundo
+            bossSpawnRate: 40000, // 40 segundos
+            powerUpSpawnRate: 10000, // 10 segundos
+            specialCooldown: {
+                fireMage: 15000,
+                archer: 10000,
+                knight: 10000
+            }
+        };
+
+        // Elementos do DOM
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const menu = document.getElementById('menu');
+        const gameUI = document.getElementById('gameUI');
+        const healthFill = document.getElementById('healthFill');
+        const specialFill = document.getElementById('specialFill');
+        const scoreElement = document.getElementById('score');
+        const gameOverScreen = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const characterElements = document.querySelectorAll('.character');
+
+        // Estado do jogo
+        let gameRunning = false;
+        let score = 0;
+        let selectedCharacter = null;
+        let player = null;
+        let enemies = [];
+        let projectiles = [];
+        let enemyProjectiles = [];
+        let effects = [];
+        let powerUps = [];
+        let lastEnemySpawn = 0;
+        let lastBossSpawn = 0;
+        let lastPowerUpSpawn = 0;
+        let specialReady = true;
+        let specialCooldown = 0;
+        let keys = {};
+        let mouse = { x: 0, y: 0 };
+        let lastShotTime = 0;
+        let specialActive = false;
+        let specialEndTime = 0;
+        let gameTime = 0;
+        let infiniteAmmo = false;
+        let infiniteAmmoEndTime = 0;
+
+        // Ajustar tamanho do canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            config.width = canvas.width;
+            config.height = canvas.height;
+        }
+
+        // Classes do jogo
+        class Player {
+            constructor(type) {
+                this.x = config.width / 2;
+                this.y = config.height / 2;
+                this.size = config.playerSize;
+                this.speed = config.playerSpeed;
+                this.type = type;
+                this.color = '#fff';
+                this.bulletSpeed = 10;
+                this.bulletSize = 8;
+                this.bulletColor = '#0ff';
+                this.lastShotTime = 0;
+                this.shotInterval = 0;
+                this.specialCooldown = config.specialCooldown[type];
+                this.specialActive = false;
+                this.specialEndTime = 0;
+                this.damage = 0;
+                this.invulnerable = false;
+                this.swordAngle = 0;
+                
+                // Configurações específicas por personagem
+                switch(type) {
+                    case 'fireMage':
+                        this.color = '#f50';
+                        this.bulletColor = '#f80';
+                        this.bulletSize = 12;
+                        this.shotInterval = 650;
+                        this.damage = 40;
+                        this.maxHealth = 150;
+                        this.health = 150;
+                       
+                        break;
+                    case 'archer':
+                        this.color = '#0a0';
+                        this.bulletColor = '#0f0';
+                        this.bulletSize = 6;
+                        this.shotInterval = 250;
+                        this.damage = 33;
+                        this.maxHealth = 200;
+                        this.health = 200;
+                        break;
+                    case 'knight':
+                        this.color = '#333';
+                        this.bulletColor = '#aaa';
+                        this.bulletSize = 7;
+                        this.shotInterval = 550;
+                        this.damage = 50;
+                        this.maxHealth = 300;
+                        this.health = 300;
+                        this.bulletRange = 300;
+                        break;
+                }
+            }
+            
+            update() {
+                // Movimento
+                let moveX = 0;
+                let moveY = 0;
+                
+                if (keys['ArrowUp'] || keys['w']) moveY -= this.speed;
+                if (keys['ArrowDown'] || keys['s']) moveY += this.speed;
+                if (keys['ArrowLeft'] || keys['a']) moveX -= this.speed;
+                if (keys['ArrowRight'] || keys['d']) moveX += this.speed;
+                
+                // Normalizar movimento diagonal
+                if (moveX !== 0 && moveY !== 0) {
+                    moveX *= 0.7071; // 1/sqrt(2)
+                    moveY *= 0.7071;
+                }
+                
+                this.x += moveX;
+                this.y += moveY;
+                
+                // Limitar ao canvas
+                this.x = Math.max(this.size, Math.min(config.width - this.size, this.x));
+                this.y = Math.max(this.size, Math.min(config.height - this.size, this.y));
+                
+                // Verificar se habilidade especial está ativa
+                if (this.specialActive && Date.now() > this.specialEndTime) {
+                    this.specialActive = false;
+                    if (this.type === 'archer') {
+                        this.speed = config.playerSpeed;
+                    } else if (this.type === 'knight') {
+                        this.invulnerable = false;
+                    }
+                }
+                
+                // Atualizar ângulo da espada do cavaleiro
+                if (this.type === 'knight') {
+                    this.swordAngle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+                }
+                
+                // Verificar power-up de munição infinita
+                if (infiniteAmmo && Date.now() > infiniteAmmoEndTime) {
+                    infiniteAmmo = false;
+                }
+            }
+            
+            draw() {
+                // Desenhar jogador com transparência se estiver invulnerável
+                if (this.invulnerable) {
+                    ctx.globalAlpha = 0.6;
+                }
+                
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Resetar transparência
+                ctx.globalAlpha = 1.0;
+                
+                // Desenhar aura se for mago de fogo com especial ativo
+                if (this.type === 'fireMage' && this.specialActive) {
+                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.5)';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size + 30, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // Desenhar espada se for cavaleiro com especial ativo
+                if (this.type === 'knight' && this.specialActive) {
+                    const swordLength = this.size * 2;
+                    const swordEndX = this.x + Math.cos(this.swordAngle) * swordLength;
+                    const swordEndY = this.y + Math.sin(this.swordAngle) * swordLength;
+                    
+                    ctx.strokeStyle = '#aaa';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(swordEndX, swordEndY);
+                    ctx.stroke();
+                    
+                    // Desenhar ponta da espada
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(swordEndX, swordEndY, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            shoot(targetX, targetY) {
+                // Verificar se pode atirar (intervalo e se não está com especial ativo que impede tiros)
+                const now = Date.now();
+                if ((now - this.lastShotTime < this.shotInterval && !infiniteAmmo) || 
+                    (this.type === 'knight' && this.specialActive)) {
+                    return;
+                }
+                
+                this.lastShotTime = now;
+                
+                // Calcular direção
+                const angle = Math.atan2(targetY - this.y, targetX - this.x);
+                
+                switch(this.type) {
+                    case 'fireMage':
+                        // Mago atira dois projéteis um atrás do outro com delay
+                        const offset = 15;
+                        const bullet1 = new Bullet(
+                            this.x + Math.cos(angle) * offset,
+                            this.y + Math.sin(angle) * offset,
+                            angle,
+                            this.bulletSpeed,
+                            this.bulletSize,
+                            this.bulletColor,
+                            this.damage,
+                            'burn',
+                            { damage: 10, duration: 3000 }
+                        );
+                        
+                        projectiles.push(bullet1);
+                        
+                        // Segundo projetil com delay
+                        setTimeout(() => {
+                            if (gameRunning) {
+                                const bullet2 = new Bullet(
+                                    this.x + Math.cos(angle) * offset,
+                                    this.y + Math.sin(angle) * offset,
+                                    angle,
+                                    this.bulletSpeed,
+                                    this.bulletSize,
+                                    this.bulletColor,
+                                    this.damage,
+                                    'burn',
+                                    { damage: 10, duration: 3000 }
+                                );
+                                projectiles.push(bullet2);
+                            }
+                        }, 100);
+                        break;
+                        
+                    case 'archer':
+                        // Arqueiro atira uma flecha
+                        const arrow = new Bullet(
+                            this.x,
+                            this.y,
+                            angle,
+                            this.bulletSpeed * 2.3,
+                            this.bulletSize,
+                            this.bulletColor,
+                            this.damage
+                        );
+                        projectiles.push(arrow);
+                        break;
+                        
+                    case 'knight':
+                        // Cavaleiro atira três balas em leque com alcance curto
+                        for (let i = -1; i <= 1; i++) {
+                            const spreadAngle = angle + (i * 0.2);
+                            const bullet = new Bullet(
+                                this.x,
+                                this.y,
+                                spreadAngle,
+                                this.bulletSpeed,
+                                this.bulletSize,
+                                this.bulletColor,
+                                this.damage,
+                                null,
+                                null,
+                                this.bulletRange // Alcance curto
+                            );
+                            projectiles.push(bullet);
+                        }
+                        break;
+                }
+            }
+            
+            useSpecial(targetX, targetY) {
+                if (!specialReady || this.specialActive) return;
+                
+                specialReady = false;
+                this.specialActive = true;
+                
+                switch(this.type) {
+                    case 'fireMage':
+                        // Criar 50 bolas de fogo em todas as direções
+                        for (let i = 0; i < 50; i++) {
+                            const angle = (i / 50) * Math.PI * 2;
+                            const bullet = new Bullet(
+                                this.x,
+                                this.y,
+                                angle,
+                                this.bulletSpeed * 1.2,
+                                this.bulletSize * 1.5,
+                                '#f50',
+                                70,
+                                'burn',
+                                { damage: 20, duration: 5000 }
+                            );
+                            projectiles.push(bullet);
+                        }
+                        
+                        // Adicionar efeito de aura
+                        effects.push({
+                            x: this.x,
+                            y: this.y,
+                            radius: this.size + 30,
+                            damage: 5,
+                            interval: 800,
+                            lastHitTime: 0,
+                            duration: 3000,
+                            startTime: Date.now(),
+                            type: 'aura'
+                        });
+                        
+                        this.specialEndTime = Date.now();
+                        break;
+                        
+                    case 'archer':
+                        // Atirar 60 flechas na direção do mouse
+                        const angle = Math.atan2(targetY - this.y, targetX - this.x);
+                        for (let i = 0; i < 60; i++) {
+                            const spreadAngle = angle + (Math.random() - 0.5) * 0.5;
+                            const arrow = new Bullet(
+                                this.x,
+                                this.y,
+                                spreadAngle,
+                                this.bulletSpeed * 1.8,
+                                this.bulletSize,
+                                this.bulletColor,
+                                this.damage
+                            );
+                            projectiles.push(arrow);
+                        }
+                        
+                        // Dash para trás
+                        const dashAngle = angle + Math.PI;
+                        this.x += Math.cos(dashAngle) * 100;
+                        this.y += Math.sin(dashAngle) * 100;
+                        
+                        // Boost de velocidade temporário
+                        this.speed = config.playerSpeed * 1.5;
+                        setTimeout(() => {
+                            if (this.specialActive) {
+                                this.speed = config.playerSpeed;
+                            }
+                        }, 1000);
+                        
+                        this.specialEndTime = Date.now();
+                        break;
+                        
+                    case 'knight':
+                        // Ativar modo espada e invulnerabilidade
+                        this.invulnerable = true;
+                        this.specialEndTime = Date.now() + 5000; // 5 segundos
+                        break;
+                }
+                
+                // Iniciar cooldown
+                setTimeout(() => {
+                    specialReady = true;
+                }, this.specialCooldown);
+            }
+            
+            takeDamage(amount) {
+                if (this.invulnerable) return;
+                
+                this.health -= amount;
+                healthFill.style.width = `${(this.health / this.maxHealth) * 100}%`;
+                
+                if (this.health <= 0) {
+                    gameOver();
+                }
+            }
+            
+            heal(amount) {
+                this.health = Math.min(this.maxHealth, this.health + amount);
+                healthFill.style.width = `${(this.health / this.maxHealth) * 100}%`;
+            }
+        }
+
+        class Enemy {
+            constructor(type) {
+                this.type = type;
+                this.size = 15;
+                this.speed = 1.5;
+                this.health = 50;
+                this.maxHealth = 50;
+                this.damage = 20;
+                this.color = '#ff0';
+                this.lastHitTime = 0;
+                this.hitInterval = 1000;
+                
+                // Configurações específicas por tipo de inimigo
+                switch(type) {
+                    case 'yellow':
+                        this.color = '#ff0';
+                        this.health = 25;
+                        this.maxHealth = 25;
+                        this.damage = 20;
+                        this.speed = 3.0;
+                        break;
+                    case 'red':
+                        this.color = '#f00';
+                        this.health = 75;
+                        this.maxHealth = 75;
+                        this.damage = 30;
+                        this.speed = 1.5;
+                        break;
+                    case 'darkRed':
+                        this.color = '#800';
+                        this.size = 20;
+                        this.health = 150;
+                        this.maxHealth = 150;
+                        this.damage = 35;
+                        this.speed = 1.0;
+                        break;
+                    case 'blue':
+                        this.color = '#00f';
+                        this.health = 480;
+                        this.maxHealth = 480;
+                        this.damage = 25;
+                        this.speed = 1.5;
+                        break;
+                    case 'brown':
+                        this.color = '#840';
+                        this.health = 240;
+                        this.maxHealth = 240;
+                        this.damage = 30;
+                        this.speed = 1.5;
+                        this.shootInterval = 1500;
+                        this.lastShotTime = 0;
+                        this.range = 250;
+                        break;
+                    case 'boss':
+                        this.color = '#808';
+                        this.size = 50;
+                        this.health = 1000;
+                        this.maxHealth = 1000;
+                        this.damage = 70;
+                        this.speed = 0.8;
+                        this.shootInterval = 3000;
+                        this.lastShotTime = 0;
+                        break;
+                }
+                
+                // Posição inicial aleatória nas bordas
+                const side = Math.floor(Math.random() * 4);
+                switch(side) {
+                    case 0: // top
+                        this.x = Math.random() * config.width;
+                        this.y = -this.size;
+                        break;
+                    case 1: // right
+                        this.x = config.width + this.size;
+                        this.y = Math.random() * config.height;
+                        break;
+                    case 2: // bottom
+                        this.x = Math.random() * config.width;
+                        this.y = config.height + this.size;
+                        break;
+                    case 3: // left
+                        this.x = -this.size;
+                        this.y = Math.random() * config.height;
+                        break;
+                }
+            }
+            
+            update() {
+                // Movimento em direção ao jogador
+                if (this.type === 'brown') {
+                    // Inimigo marrom para quando está no alcance
+                    const dx = player.x - this.x;
+                    const dy = player.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > this.range) {
+                        const angle = Math.atan2(dy, dx);
+                        this.x += Math.cos(angle) * this.speed;
+                        this.y += Math.sin(angle) * this.speed;
+                    } else {
+                        // Atirar se estiver no alcance
+                        const now = Date.now();
+                        if (now - this.lastShotTime > this.shootInterval) {
+                            this.shoot();
+                            this.lastShotTime = now;
+                        }
+                    }
+                } else if (this.type === 'boss') {
+                    // Boss se move e atira periodicamente
+                    const dx = player.x - this.x;
+                    const dy = player.y - this.y;
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                    
+                    // Atirar projéteis
+                    const now = Date.now();
+                    if (now - this.lastShotTime > this.shootInterval) {
+                        this.shoot();
+                        this.lastShotTime = now;
+                    }
+                } else {
+                    // Movimento normal para outros inimigos
+                    const dx = player.x - this.x;
+                    const dy = player.y - this.y;
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                }
+                
+                // Verificar colisão com o jogador
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < player.size + this.size) {
+                    const now = Date.now();
+                    if (now - this.lastHitTime > this.hitInterval) {
+                        player.takeDamage(this.damage);
+                        this.lastHitTime = now;
+                    }
+                }
+            }
+            
+            draw() {
+                // Corpo do inimigo
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Barra de vida (exceto para inimigos normais)
+                if (this.type === 'boss' || this.type === 'darkRed' || this.type === 'brown') {
+                    const barWidth = this.size * 2;
+                    const barHeight = 5;
+                    const healthPercent = this.health / this.maxHealth;
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(this.x - barWidth/2, this.y - this.size - 10, barWidth, barHeight);
+                    ctx.fillStyle = healthPercent > 0.5 ? '#0f0' : healthPercent > 0.25 ? '#ff0' : '#f00';
+                    ctx.fillRect(this.x - barWidth/2, this.y - this.size - 10, barWidth * healthPercent, barHeight);
+                }
+            }
+            
+            shoot() {
+                if (this.type === 'brown') {
+                    // Atirar um projetil marrom na direção do jogador
+                    const angle = Math.atan2(player.y - this.y, player.x - this.x);
+                    const bullet = new Bullet(
+                        this.x,
+                        this.y,
+                        angle,
+                        7,
+                        8,
+                        '#840',
+                        this.damage
+                    );
+                    enemyProjectiles.push(bullet);
+                } else if (this.type === 'boss') {
+                    // Atirar 5 projéteis rosas em um leque
+                    const angle = Math.atan2(player.y - this.y, player.x - this.x);
+                    for (let i = -2; i <= 2; i++) {
+                        const spreadAngle = angle + (i * 0.2);
+                        const bullet = new Bullet(
+                            this.x,
+                            this.y,
+                            spreadAngle,
+                            6,
+                            12,
+                            '#f0f',
+                            60
+                        );
+                        enemyProjectiles.push(bullet);
+                    }
+                }
+            }
+            
+            takeDamage(amount) {
+                this.health -= amount;
+                
+                if (this.health <= 0) {
+                    // Remover inimigo
+                    const index = enemies.indexOf(this);
+                    if (index !== -1) {
+                        enemies.splice(index, 1);
+                        score += this.maxHealth / 5;
+                        scoreElement.textContent = `Score: ${Math.floor(score)}`;
+                        
+                        // Inimigo azul solta 4 amarelos ao morrer
+                        if (this.type === 'blue') {
+                            for (let i = 0; i < 4; i++) {
+                                enemies.push(new Enemy('yellow'));
+                            }
+                        }
+                    }
+                }
+                
+                return this.health <= 0;
+            }
+        }
+
+        class Bullet {
+            constructor(x, y, angle, speed, size, color, damage, effectType = null, effectData = null, range = null) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.speed = speed;
+                this.size = size;
+                this.color = color;
+                this.damage = damage;
+                this.effectType = effectType;
+                this.effectData = effectData;
+                this.range = range;
+                this.distanceTraveled = 0;
+                this.startX = x;
+                this.startY = y;
+            }
+            
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.distanceTraveled = Math.sqrt((this.x - this.startX) ** 2 + (this.y - this.startY) ** 2);
+                
+                // Verificar se saiu da tela ou atingiu o alcance máximo
+                return this.x < -this.size || this.x > config.width + this.size || 
+                       this.y < -this.size || this.y > config.height + this.size ||
+                       (this.range !== null && this.distanceTraveled >= this.range);
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class PowerUp {
+            constructor(type) {
+                this.type = type;
+                this.size = 15;
+                this.x = Math.random() * (config.width - 40) + 20;
+                this.y = Math.random() * (config.height - 40) + 20;
+                
+                switch(type) {
+                    case 'health20':
+                        this.color = '#0a0';
+                        this.healAmount = 20;
+                        break;
+                    case 'health40':
+                        this.color = '#080';
+                        this.healAmount = 40;
+                        break;
+                    case 'health80':
+                        this.color = '#050';
+                        this.healAmount = 80;
+                        break;
+                    case 'infiniteAmmo':
+                        this.color = '#00f';
+                        this.duration = 5000;
+                        break;
+                }
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                
+                // Desenhar borda
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+            }
+            
+            checkCollision() {
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < player.size + this.size) {
+                    if (this.type.includes('health')) {
+                        player.heal(this.healAmount);
+                    } else if (this.type === 'infiniteAmmo') {
+                        infiniteAmmo = true;
+                        infiniteAmmoEndTime = Date.now() + this.duration;
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // Funções do jogo
+        function spawnEnemy() {
+            const types = ['yellow', 'red', 'darkRed', 'blue', 'brown'];
+            const weights = [0.3, 0.25, 0.1, 0.2, 0.15]; // Probabilidades para cada tipo
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            let typeIndex = 0;
+            
+            for (let i = 0; i < weights.length; i++) {
+                if (random < weights[i]) {
+                    typeIndex = i;
+                    break;
+                }
+                random -= weights[i];
+            }
+            
+            enemies.push(new Enemy(types[typeIndex]));
+        }
+
+        function spawnBoss() {
+            enemies.push(new Enemy('boss'));
+        }
+
+        function spawnPowerUp() {
+            const types = ['health20', 'health40', 'health80', 'infiniteAmmo'];
+            const weights = [0.4, 0.3, 0.2, 0.1]; // Probabilidades para cada tipo
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            let typeIndex = 0;
+            
+            for (let i = 0; i < weights.length; i++) {
+                if (random < weights[i]) {
+                    typeIndex = i;
+                    break;
+                }
+                random -= weights[i];
+            }
+            
+            powerUps.push(new PowerUp(types[typeIndex]));
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            gameOverScreen.style.display = 'flex';
+            finalScoreElement.textContent = `Score: ${Math.floor(score)}`;
+        }
+
+        function resetGame() {
+            player = new Player(selectedCharacter);
+            enemies = [];
+            projectiles = [];
+            enemyProjectiles = [];
+            effects = [];
+            powerUps = [];
+            score = 0;
+            scoreElement.textContent = `Score: 0`;
+            healthFill.style.width = '100%';
+            specialFill.style.width = '0%';
+            specialReady = true;
+            specialActive = false;
+            infiniteAmmo = false;
+            lastEnemySpawn = 0;
+            lastBossSpawn = 0;
+            lastPowerUpSpawn = 0;
+            gameTime = 0;
+            gameOverScreen.style.display = 'none';
+            gameRunning = true;
+        }
+
+        function update() {
+            if (!gameRunning) return;
+            
+            const now = Date.now();
+            gameTime = now;
+            
+            // Atualizar jogador
+            player.update();
+            
+            // Spawn de inimigos
+            if (now - lastEnemySpawn > config.enemySpawnRate) {
+                spawnEnemy();
+                lastEnemySpawn = now;
+            }
+            
+            // Spawn de boss
+            if (now - lastBossSpawn > config.bossSpawnRate) {
+                spawnBoss();
+                lastBossSpawn = now;
+            }
+            
+            // Spawn de power-ups
+            if (now - lastPowerUpSpawn > config.powerUpSpawnRate) {
+                spawnPowerUp();
+                lastPowerUpSpawn = now;
+            }
+            
+            // Atualizar inimigos
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                enemies[i].update();
+                
+                // Verificar colisão com projéteis do jogador
+                for (let j = projectiles.length - 1; j >= 0; j--) {
+                    const bullet = projectiles[j];
+                    const dx = enemies[i].x - bullet.x;
+                    const dy = enemies[i].y - bullet.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < enemies[i].size + bullet.size) {
+                        const died = enemies[i].takeDamage(bullet.damage);
+                        
+                        // Aplicar efeitos se houver
+                        if (bullet.effectType === 'burn' && !died) {
+                            effects.push({
+                                target: enemies[i],
+                                damage: bullet.effectData.damage,
+                                interval: 1000,
+                                lastHitTime: now,
+                                duration: bullet.effectData.duration,
+                                startTime: now,
+                                type: 'burn'
+                            });
+                        }
+                        
+                        projectiles.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+            
+            // Atualizar projéteis do jogador
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                if (projectiles[i].update()) {
+                    projectiles.splice(i, 1);
+                }
+            }
+            
+            // Atualizar projéteis inimigos
+            for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
+                if (enemyProjectiles[i].update()) {
+                    enemyProjectiles.splice(i, 1);
+                } else {
+                    // Verificar colisão com jogador
+                    const bullet = enemyProjectiles[i];
+                    const dx = player.x - bullet.x;
+                    const dy = player.y - bullet.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < player.size + bullet.size) {
+                        player.takeDamage(bullet.damage);
+                        enemyProjectiles.splice(i, 1);
+                    }
+                }
+            }
+            
+            // Atualizar power-ups
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                if (powerUps[i].checkCollision()) {
+                    powerUps.splice(i, 1);
+                }
+            }
+            
+            // Atualizar efeitos
+            for (let i = effects.length - 1; i >= 0; i--) {
+                const effect = effects[i];
+                
+                if (effect.type === 'burn' || effect.type === 'aura') {
+                    if (now - effect.startTime > effect.duration) {
+                        effects.splice(i, 1);
+                        continue;
+                    }
+                    
+                    if (effect.type === 'burn') {
+                        // Efeito de queimadura em inimigos
+                        if (now - effect.lastHitTime > effect.interval) {
+                            effect.target.takeDamage(effect.damage);
+                            effect.lastHitTime = now;
+                        }
+                    } else if (effect.type === 'aura') {
+                        // Aura de fogo do mago
+                        effect.x = player.x;
+                        effect.y = player.y;
+                        
+                        // Verificar colisão com inimigos
+                        for (let j = 0; j < enemies.length; j++) {
+                            const enemy = enemies[j];
+                            const dx = enemy.x - effect.x;
+                            const dy = enemy.y - effect.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < effect.radius + enemy.size) {
+                                if (now - effect.lastHitTime > effect.interval) {
+                                    enemy.takeDamage(effect.damage);
+                                    effect.lastHitTime = now;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Atualizar barra de especial
+            if (!specialReady) {
+                const elapsed = now - (player.specialActive ? player.specialEndTime - player.specialCooldown : gameTime - player.specialCooldown);
+                const percent = (elapsed / player.specialCooldown) * 100;
+                specialFill.style.width = `${Math.min(100, percent)}%`;
+            } else {
+                specialFill.style.width = '100%';
+            }
+            
+            // Cavaleiro com especial ativo - verificar colisão com espada
+            if (player.type === 'knight' && player.specialActive) {
+                const swordLength = player.size * 2;
+                const swordEndX = player.x + Math.cos(player.swordAngle) * swordLength;
+                const swordEndY = player.y + Math.sin(player.swordAngle) * swordLength;
+                
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const enemy = enemies[i];
+                    
+                    // Verificar colisão com a espada
+                    if (checkLineCircleCollision(
+                        player.x, player.y, swordEndX, swordEndY,
+                        enemy.x, enemy.y, enemy.size
+                    )) {
+                        if (now - enemy.lastHitTime > 450) {
+                            enemy.takeDamage(50);
+                            enemy.lastHitTime = now;
+                        }
+                    }
+                }
+            }
+            
+            // Tiro automático se estiver com munição infinita
+            if (infiniteAmmo && (now - player.lastShotTime > 100)) {
+                player.shoot(mouse.x, mouse.y);
+            }
+        }
+
+        function checkLineCircleCollision(x1, y1, x2, y2, cx, cy, r) {
+            // Verificar se o ponto mais próximo da linha está dentro do círculo
+            const lineLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const u = ((cx - x1) * (x2 - x1) + (cy - y1) * (y2 - y1)) / (lineLength ** 2);
+            
+            if (u < 0 || u > 1) {
+                // O ponto mais próximo está fora do segmento de linha
+                const dist1 = Math.sqrt((cx - x1) ** 2 + (cy - y1) ** 2);
+                const dist2 = Math.sqrt((cx - x2) ** 2 + (cy - y2) ** 2);
+                return Math.min(dist1, dist2) <= r;
+            } else {
+                const px = x1 + u * (x2 - x1);
+                const py = y1 + u * (y2 - y1);
+                const dist = Math.sqrt((cx - px) ** 2 + (cy - py) ** 2);
+                return dist <= r;
+            }
+        }
+
+        function draw() {
+            if (!gameRunning) return;
+            
+            // Limpar tela
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, config.width, config.height);
+            
+            // Desenhar power-ups
+            for (const powerUp of powerUps) {
+                powerUp.draw();
+            }
+            
+            // Desenhar projéteis inimigos
+            for (const bullet of enemyProjectiles) {
+                bullet.draw();
+            }
+            
+            // Desenhar inimigos
+            for (const enemy of enemies) {
+                enemy.draw();
+            }
+            
+            // Desenhar projéteis do jogador
+            for (const bullet of projectiles) {
+                bullet.draw();
+            }
+            
+            // Desenhar jogador
+            player.draw();
+            
+            // Desenhar efeitos
+            for (const effect of effects) {
+                if (effect.type === 'aura') {
+                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.3)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            // Desenhar texto de power-up ativo
+            if (infiniteAmmo) {
+                const timeLeft = Math.ceil((infiniteAmmoEndTime - Date.now()) / 1000);
+                ctx.fillStyle = '#00f';
+                ctx.font = '20px Arial';
+                ctx.fillText(`Munição Infinita: ${timeLeft}s`, 20, 50);
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        window.addEventListener('resize', resizeCanvas);
+        
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            // Tecla E para habilidade especial
+            if (e.key === 'e' && gameRunning) {
+                player.useSpecial(mouse.x, mouse.y);
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameRunning && e.button === 0) {
+                player.shoot(mouse.x, mouse.y);
+            }
+        });
+        
+        startButton.addEventListener('click', () => {
+            if (!selectedCharacter) return;
+            
+            menu.style.display = 'none';
+            gameUI.style.display = 'block';
+            resetGame();
+        });
+        
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none';
+            resetGame();
+        });
+        
+        characterElements.forEach(el => {
+            el.addEventListener('click', () => {
+                characterElements.forEach(c => c.classList.remove('selected'));
+                el.classList.add('selected');
+                selectedCharacter = el.dataset.character;
+            });
+        });
+
+        // Inicialização
+        resizeCanvas();
+        gameUI.style.display = 'none';
+        gameOverScreen.style.display = 'none';
+        gameLoop();
+    </script>
+</body>
+</html>
