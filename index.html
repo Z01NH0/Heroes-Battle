@@ -683,148 +683,144 @@ function drawMountedKnight(g,p){
  const dir=facingDir(renderFacing),intro=p.specialAnim==='knight_mount'&&p.specialAnimTimer>0;
  const introT=intro?clamp(1-p.specialAnimTimer/Math.max(.01,p.specialAnimDuration),0,1):1;
  const rear=intro?Math.sin(introT*Math.PI):0;
- const moveCycle=performance.now()/120;
- const gallop=(p.moving&&!intro)?moveCycle:0;
- const gaitSin=Math.sin(gallop),gaitCos=Math.cos(gallop);
- const bodyBob=intro?0:Math.round(gaitSin*1.6);
- const bodyPitch=intro?-rear*.085:gaitSin*.014;
- const shadowStretch=rear*8+(p.moving&&!intro?Math.abs(gaitSin)*3:0);
- const torsoBase='#5d422e',torsoDark='#3b291d',torsoDeep='#261912',torsoHi='#8a694d';
- const mane='#251712',maneHi='#4f3427',hoof='#cabca2',saddle='#4d2028',saddleHi='#86545a',metal='#d7d7d5',strap='#574839',cloth='#26292e',clothHi='#5e666f';
- const neckLift=Math.round(rear*9)+(intro?2:Math.round(gaitSin*1.5));
- const headNod=intro?Math.round(rear*6):Math.round(Math.sin(gallop+.75)*2);
- const tailSwing=intro?Math.round(Math.sin(introT*Math.PI*4)*3):Math.round(Math.sin(gallop*1.3+.7)*4);
- const maneSwing=intro?Math.round(Math.sin(introT*Math.PI*3)*2):Math.round(Math.sin(gallop*1.4+.2)*2);
- const frontRearLift=Math.round(rear*15),hindSink=Math.round(rear*3);
- const riderRise=Math.round(rear*5)+(intro?0:Math.round(Math.sin(gallop*2+.6)));
- const hoofDust=intro?1:0;
+ const gaitT=performance.now()/115;
+ const gait=p.moving&&!intro?gaitT:0;
+ const gaitSin=Math.sin(gait), gaitCos=Math.cos(gait);
+ const bob=intro?0:Math.round(gaitSin*1.2);
+ const bodyTilt=intro?-rear*.075:gaitSin*.01;
+ const lift=Math.round(rear*8);
+ const headRaise=Math.round(rear*7)+(intro?0:Math.round(Math.sin(gait+.5)*1.5));
+ const foreLift=intro?Math.round(rear*15):0;
+ const hindSet=intro?Math.round(rear*2):0;
+ const tailSwing=intro?Math.round(Math.sin(introT*Math.PI*4)*2.5):Math.round(Math.sin(gait*1.2+.7)*3);
+ const maneSwing=intro?Math.round(Math.sin(introT*Math.PI*3)*1.8):Math.round(Math.sin(gait*1.4+.2)*1.5);
  const neighPulse=intro?(.5+.5*Math.sin(introT*Math.PI*3.5)):0;
+ const outline='#1c1815',deep='#2c1f18',base='#6b4a31',shade='#513723',hi='#8a6544',mane='#2b1c15',maneHi='#5a3b2c',hoof='#d1c1a3',strap='#564437',metal='#d6d2cf',saddle='#4a232a',saddleHi='#86525b',cloth='#2d3138',clothHi='#636b75';
  
- function drawLeg(x,topY,thighH,shinH,kneeOffset,footLift,far=false,armor=false){
-  const baseCol=far?torsoDark:torsoBase;
-  const hiCol=far?torsoBase:torsoHi;
-  pxo(g,x,topY,5,thighH,baseCol,torsoDeep);
-  px(g,x+1,topY+1,2,Math.max(2,thighH-2),hiCol);
-  const kneeX=x+kneeOffset,kneeY=topY+thighH-1;
-  pxo(g,kneeX,kneeY,4,shinH,baseCol,torsoDeep);
-  px(g,kneeX+1,kneeY+1,2,Math.max(2,shinH-2),hiCol);
-  if(armor){pxo(g,kneeX-1,kneeY+Math.max(1,shinH-3),6,4,metal,torsoDeep);}
-  pxo(g,kneeX-1,kneeY+shinH+footLift,7,3,hoof,torsoDeep);
+ function drawLegPair(front,x,y,phase,far=false){
+  const col=far?shade:base, hicol=far?base:hi, oy=y+(far?1:0);
+  let thigh=11, shin=8, liftA=0, liftB=0, kneeA=1, kneeB=1;
+  if(!intro){
+   if(front){
+    liftA=Math.max(0,Math.round(( phase>0? phase:0)*4));
+    liftB=Math.max(0,Math.round((-phase>0?-phase:0)*4));
+    kneeA=phase>0?2:1; kneeB=phase<0?2:1;
+   }else{
+    liftA=Math.max(0,Math.round((-phase>0?-phase:0)*3));
+    liftB=Math.max(0,Math.round(( phase>0? phase:0)*3));
+    kneeA=phase<0?1:0; kneeB=phase>0?1:0;
+   }
+  }else if(front){
+   liftA=foreLift; liftB=foreLift-2; kneeA=3; kneeB=3;
+  }else{
+   liftA=-hindSet; liftB=-hindSet+1;
+  }
+  // back of the pair
+  pxo(g,x,oy-liftA,4,thigh,col,outline);
+  px(g,x+1,oy+1-liftA,2,thigh-2,hicol);
+  pxo(g,x+kneeA,oy+thigh-1-liftA,4,shin,col,outline);
+  px(g,x+kneeA+1,oy+thigh-liftA,2,shin-2,hicol);
+  pxo(g,x+kneeA-1,oy+thigh+shin-1-liftA,6,3,hoof,outline);
+  // front of the pair
+  pxo(g,x+11,oy-liftB,4,thigh,col,outline);
+  px(g,x+12,oy+1-liftB,2,thigh-2,hicol);
+  pxo(g,x+11-kneeB,oy+thigh-1-liftB,4,shin,col,outline);
+  px(g,x+12-kneeB,oy+thigh-liftB,2,shin-2,hicol);
+  pxo(g,x+10-kneeB,oy+thigh+shin-1-liftB,6,3,hoof,outline);
  }
  
  g.save();
- g.translate(p.x,p.y+bodyBob);
+ g.translate(p.x,p.y+bob);
  if(dir==='left')g.scale(-1,1);
- drawPixelShadow(g,58-shadowStretch,14-rear*2,0,20,'rgba(0,0,0,.32)');
- g.translate(0,-Math.round(rear*8));
- g.rotate(bodyPitch);
+ drawPixelShadow(g,54-rear*7-(p.moving&&!intro?Math.abs(gaitSin)*2:0),13-rear*2,0,20,'rgba(0,0,0,.31)');
+ g.translate(0,-lift);
+ g.rotate(bodyTilt);
  
- // tail behind the body
- pxo(g,-49,-8+tailSwing,10,7,maneHi,torsoDeep);
- pxo(g,-58,-4+tailSwing,12,11,mane,torsoDeep);
- px(g,-55,2+tailSwing,4,10,maneHi);
+ // tail behind body
+ pxo(g,-44,-6+tailSwing,9,6,maneHi,outline);
+ pxo(g,-52,-3+tailSwing,11,11,mane,outline);
+ px(g,-49,2+tailSwing,4,10,maneHi);
  
  // far legs first
- const farFrontLift=intro?frontRearLift+4:Math.max(0,Math.round((gaitSin+1)*3));
- const nearFrontLift=intro?frontRearLift+8:Math.max(0,Math.round((1-gaitSin)*3));
- const farHindLift=intro?-hindSink:Math.max(0,Math.round((1-gaitSin)*2));
- const nearHindLift=intro?-hindSink:Math.max(0,Math.round((gaitSin+1)*2));
- drawLeg(-29,12+farHindLift,11,8,-1,0,true,false);
- drawLeg(8,10-farFrontLift,10,8,2,0,true,true);
+ drawLegPair(false,-26,12, gaitSin,true);
+ drawLegPair(true,7,11, -gaitSin,true);
  
- // body mass
- pxo(g,-40,-2,64,18,torsoBase,torsoDeep);
- px(g,-35,0,54,6,torsoHi);
- px(g,-28,9,40,4,torsoHi);
- pxo(g,-46,2,18,13,torsoDark,torsoDeep);
- px(g,-43,5,11,4,torsoHi);
- pxo(g,16,-3,18,17,torsoBase,torsoDeep);
- px(g,19,-1,11,5,torsoHi);
- px(g,-18,-6,28,4,torsoHi);
- px(g,-8,14,24,3,torsoDark);
+ // body - single clear mass
+ pxo(g,-38,-1,60,19,base,outline);
+ px(g,-33,1,50,6,hi);
+ px(g,-31,8,44,4,shade);
+ px(g,-9,-5,18,4,hi);
+ pxo(g,-42,4,14,12,shade,outline); // rump
+ px(g,-39,6,8,4,hi);
+ pxo(g,16,1,12,14,shade,outline); // chest bulk
+ px(g,18,3,7,4,hi);
+ px(g,-14,15,20,2,deep);
  
- // saddle, blanket and tack
- pxo(g,-11,-18,24,9,cloth,torsoDeep);
- px(g,-9,-15,20,4,clothHi);
- pxo(g,-6,-13,18,10,saddle,torsoDeep);
- px(g,-4,-10,14,4,saddleHi);
- pxo(g,-14,-7,4,18,strap,torsoDeep);
- pxo(g,11,-7,4,18,strap,torsoDeep);
- px(g,-15,8,30,2,metal);
- pxo(g,-18,10,8,3,metal,torsoDeep);
- pxo(g,10,10,8,3,metal,torsoDeep);
+ // blanket + saddle + straps
+ pxo(g,-8,-17,22,8,cloth,outline);
+ px(g,-6,-14,18,3,clothHi);
+ pxo(g,-4,-12,15,9,saddle,outline);
+ px(g,-2,-9,11,4,saddleHi);
+ pxo(g,-10,-8,3,17,strap,outline);
+ pxo(g,11,-8,3,17,strap,outline);
+ pxo(g,-15,9,7,3,metal,outline);
+ pxo(g,10,9,7,3,metal,outline);
  
- // neck, mane and head
- pxo(g,20,-18-neckLift,18,13,torsoBase,torsoDeep);
- px(g,23,-15-neckLift,10,4,torsoHi);
- pxo(g,22,-21-neckLift-maneSwing,8,15,mane,torsoDeep);
- px(g,24,-18-neckLift-maneSwing,3,9,maneHi);
- pxo(g,35,-22-neckLift-headNod,16,12,torsoBase,torsoDeep);
- px(g,38,-20-neckLift-headNod,8,4,torsoHi);
- pxo(g,48,-19-neckLift-headNod,7,8,torsoBase,torsoDeep);
- px(g,51,-17-neckLift-headNod,2,2,torsoHi);
- px(g,46,-20-neckLift-headNod,2,2,'#161312');
- px(g,52,-16-neckLift-headNod,3,2,'#161312');
- pxo(g,40,-29-neckLift-headNod,3,7,mane,torsoDeep);
- pxo(g,46,-30-neckLift-headNod,3,8,mane,torsoDeep);
- px(g,52,-11-neckLift-headNod,5,2,torsoDark);
+ // neck and head - cleaner single silhouette
+ pxo(g,18,-16-headRaise,13,13,base,outline);
+ px(g,20,-13-headRaise,8,4,hi);
+ pxo(g,18,-18-headRaise-maneSwing,6,14,mane,outline);
+ px(g,20,-15-headRaise-maneSwing,2,8,maneHi);
+ pxo(g,29,-19-headRaise,16,11,base,outline);
+ px(g,32,-16-headRaise,8,3,hi);
+ pxo(g,42,-17-headRaise,7,7,base,outline);
+ px(g,43,-14-headRaise,2,2,'#151211');
+ px(g,46,-13-headRaise,2,2,'#151211');
+ pxo(g,35,-27-headRaise,3,7,mane,outline); // ear 1
+ pxo(g,40,-28-headRaise,3,8,mane,outline); // ear 2
+ px(g,46,-10-headRaise,6,2,deep); // muzzle
  
  // reins
- px(g,25,-12-neckLift,2,2,metal);
- px(g,30,-14-neckLift,16,2,metal);
- px(g,44,-14-neckLift-headNod,2,6,metal);
+ px(g,21,-11-headRaise,2,2,metal);
+ px(g,26,-13-headRaise,16,2,metal);
+ px(g,41,-13-headRaise,2,5,metal);
  
- // near legs on top
- drawLeg(-12,11+nearHindLift,12,9,1,0,false,false);
+ // near legs top layer
+ drawLegPair(false,-11,11, -gaitSin,false);
+ drawLegPair(true,18,10, gaitSin,false);
+ 
+ // front barding accent
+ px(g,19,5,6,2,hi); px(g,27,5,5,2,hi);
+ pxo(g,19,8,6,3,metal,outline); pxo(g,28,8,5,3,metal,outline);
+ 
+ // rider
+ const riderRise=Math.round(rear*4)+(intro?0:Math.round(Math.sin(gait*2+.6)));
+ pxo(g,-1,-30-riderRise,15,13,metal,outline);
+ px(g,2,-27-riderRise,10,4,'#efefec');
+ pxo(g,1,-20-riderRise,12,12,cloth,outline);
+ px(g,3,-17-riderRise,8,4,clothHi);
+ pxo(g,-4,-18-riderRise,4,12,metal,outline);
+ pxo(g,13,-18-riderRise,4,12,metal,outline);
+ px(g,-4,-6-riderRise,5,13,cloth); px(g,10,-6-riderRise,5,13,cloth);
+ pxo(g,2,-42-riderRise,10,10,'#ccb99f',outline);
+ px(g,5,-39-riderRise,4,3,'#1a1717');
+ pxo(g,0,-46-riderRise,15,5,metal,outline);
+ px(g,4,-45-riderRise,7,2,'#f5f2eb');
+ pxo(g,9,-43-riderRise,4,9,metal,outline);
+ pxo(g,12,-38-riderRise,4,23,metal,outline);
+ px(g,13,-42-riderRise,3,2,'#f8f4e7');
+ if(p.specialActive>0){px(g,-5,-28-riderRise,2,2,'#c9bf8c');px(g,16,-24-riderRise,2,2,'#f3e6c0')}
+ 
+ // neigh effect + dust during intro
  if(intro){
-  drawLeg(16,0-frontRearLift,9,7,4,1,false,true);
-  drawLeg(28,-2-frontRearLift,8,8,4,1,false,true);
- }else{
-  drawLeg(18,10-nearFrontLift,10,8,1,0,false,true);
-  drawLeg(31,11-farFrontLift,9,8,-1,0,false,true);
- }
- 
- // rider torso and head
- pxo(g,-2,-31-riderRise,16,13,metal,torsoDeep);
- px(g,1,-28-riderRise,10,4,'#f0f0ee');
- pxo(g,0,-20-riderRise,13,12,cloth,torsoDeep);
- px(g,2,-17-riderRise,9,4,clothHi);
- pxo(g,-5,-17-riderRise,5,12,metal,torsoDeep);
- pxo(g,13,-17-riderRise,5,12,metal,torsoDeep);
- px(g,-4,-4-riderRise,5,12,cloth);
- px(g,10,-4-riderRise,5,12,cloth);
- pxo(g,1,-43-riderRise,11,10,'#cdbda3',torsoDeep);
- px(g,4,-40-riderRise,4,3,'#1b1817');
- pxo(g,-1,-47-riderRise,15,6,metal,torsoDeep);
- px(g,3,-46-riderRise,7,2,'#f2efea');
- pxo(g,10,-44-riderRise,5,10,metal,torsoDeep);
- pxo(g,13,-39-riderRise,5,24,metal,torsoDeep);
- px(g,14,-43-riderRise,4,2,'#f7f4e9');
- if(p.specialActive>0){
-  px(g,-6,-28-riderRise,2,2,'#cabf8b');
-  px(g,17,-24-riderRise,2,2,'#f3e7c5');
- }
- 
- // stirrups and barding details
- pxo(g,-8,-4,3,12,metal,torsoDeep);
- pxo(g,14,-4,3,12,metal,torsoDeep);
- px(g,-15,-8,7,2,saddleHi);px(g,11,-8,8,2,saddleHi);
- px(g,-28,5,5,2,torsoHi);px(g,8,5,6,2,torsoHi);px(g,17,5,5,2,torsoHi);
- 
- // rearing neigh and dust
- if(intro){
-  g.globalAlpha=.32+.38*neighPulse;
-  g.fillStyle='#e8e0c6';
-  px(g,58,-19-neckLift-headNod,7,2,'#e8e0c6');
-  px(g,64,-24-neckLift-headNod,10,2,'#efe7d0');
-  px(g,62,-29-neckLift-headNod,6,2,'#e8e0c6');
-  g.globalAlpha=.22+.22*neighPulse;
-  px(g,66,-18-neckLift-headNod,3,9,'#d8cdb3');
-  g.globalAlpha=1;
- }
- if(hoofDust){
-  g.globalAlpha=.42*(1-rear*.18);
-  px(g,-27,23,7,3,'#8b7556');px(g,-14,25,5,2,'#8b7556');px(g,0,23,6,2,'#8b7556');
+  g.globalAlpha=.3+.35*neighPulse;
+  px(g,53,-16-headRaise,7,2,'#e7dec6');
+  px(g,58,-21-headRaise,9,2,'#f0e7d0');
+  px(g,56,-26-headRaise,5,2,'#e7dec6');
+  g.globalAlpha=.22+.18*neighPulse;
+  px(g,60,-15-headRaise,3,8,'#daccb1');
+  g.globalAlpha=.38*(1-rear*.12);
+  px(g,-22,23,6,3,'#8a7355'); px(g,-8,24,5,2,'#8a7355'); px(g,5,23,5,2,'#8a7355');
   g.globalAlpha=1;
  }
  
