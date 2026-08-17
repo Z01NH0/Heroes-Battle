@@ -197,6 +197,135 @@ body.timestop-mono #damageFlash{filter:grayscale(1)}
 
 /* V17.5 — RARIDADES DOS POWER-UPS */
 .upgrade{position:relative;--power-rarity:#777}.upgrade:before{content:attr(data-rarity);position:absolute;right:8px;top:7px;padding:3px 6px;border:2px solid var(--power-rarity);background:#0c0f11;color:var(--power-rarity);font-size:7px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.upgrade .upgrade-icon{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--power-rarity) 40%,transparent))}.upgrade.power-common{border-color:#555750}.upgrade.power-rare{border-color:#3e6f9d}.upgrade.power-epic{border-color:#704b91}.upgrade.power-legendary{border-color:#92712b}.upgrade.power-unique{border-color:#8f3942}.upgrade:hover{box-shadow:3px 3px 0 #070809,inset 0 0 0 2px color-mix(in srgb,var(--power-rarity) 35%,transparent)}
+
+/* V17.7 — UI READABILITY REWORK + NARROWER COMPOSITIONS */
+:root{--ui-panel-max:1180px}
+
+/* Main menu: larger, but deliberately not ultra-wide. */
+#menuScreen{padding:clamp(12px,2.2vh,24px)}
+.menu-shell{width:min(var(--ui-panel-max),94vw);height:min(860px,94vh);min-height:660px;grid-template-rows:108px 58px minmax(0,1fr);border-width:4px;box-shadow:0 0 0 4px #07090a,10px 10px 0 #030405}
+.menu-header{padding:17px 210px 14px 24px}
+.menu-title{font-size:clamp(44px,4.1vw,58px);line-height:.92;letter-spacing:.04em}
+.menu-subtitle{font-size:11px;letter-spacing:.28em;margin-top:10px}
+.menu-topline{right:22px;top:15px;font-size:9px}
+.menu-rune-bank{right:22px;bottom:13px;min-width:132px;padding:8px 11px}
+.menu-rune-bank .rune-value{font-size:17px}.menu-rune-bank .rune-label{font-size:8px}
+.menu-nav{height:58px;padding:7px 14px;gap:8px;align-items:center}
+.menu-tab{min-width:150px;min-height:40px;padding:9px 16px;font-size:11px;letter-spacing:.105em}
+.menu-panel{padding:16px}
+#playPanel.active{gap:14px!important}
+#playPanel .menu-art-frame{border-width:4px}
+.art-caption{font-size:10px;padding:8px 10px}
+.play-primary-row{grid-template-columns:minmax(300px,500px);padding-bottom:3px}
+.play-primary-row .start-btn{min-height:56px;font-size:15px;letter-spacing:.16em}
+
+/* Character screen: portrait-like cards instead of two huge horizontal slabs. */
+#heroesPanel.menu-panel.active{overflow:auto;padding:15px 18px 20px}
+.hero-browser-wide{max-width:1120px;margin:0 auto;padding:0 4px 16px;overflow:visible}
+.hero-panel-head{padding:4px 3px 15px;border-bottom:3px solid #383630;margin-bottom:14px;align-items:center}
+.hero-panel-head .panel-title{font-size:29px;line-height:1.05;margin-top:4px}
+.hero-panel-head .panel-sub{font-size:12px;line-height:1.5;margin-top:6px}
+.hero-panel-runes{padding:9px 11px}.hero-panel-runes .rune-value{font-size:17px}.hero-panel-runes .rune-label{font-size:8px}
+.hero-grid-clean{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;padding:0}
+.hero-grid-clean .hero-card{min-height:430px;border-width:3px;box-shadow:4px 4px 0 #070809}
+.hero-grid-clean .hero-preview-wrap{height:190px;border-bottom-width:3px}
+.hero-grid-clean .hero-body{padding:13px;gap:0}
+.hero-name{font-size:17px;line-height:1.08}.hero-role{font-size:9px;letter-spacing:.105em;margin-top:5px}
+.hero-grid-clean .hero-desc{font-size:10px;line-height:1.48;min-height:58px!important;margin-top:9px;color:#9b958a}
+.hero-stats{gap:5px;margin-top:9px}.chip{font-size:8px;padding:4px 5px;line-height:1.2}
+.hero-index{font-size:10px;padding:4px 6px}.hero-card.locked .hero-preview-wrap:after{font-size:9px;padding:5px 7px}
+.hero-card.selected:after{font-size:9px;padding:5px 7px}
+.hero-buy-overlay{bottom:12px;min-width:82%;min-height:42px;font-size:10px;padding:8px}
+.hero-card-actions{grid-template-columns:1fr;gap:7px;padding-top:11px}
+.hero-card-actions .pixel-btn{font-size:10px;min-height:39px;padding:7px 8px}
+
+/* Settings are denser vertically but larger typographically. */
+#settingsPanel{padding-top:18px;place-items:start center;overflow:auto}
+.settings-card{width:min(940px,100%)!important;padding:22px 24px 24px}
+.settings-card .panel-title{font-size:31px}.settings-card .panel-sub{font-size:12px;line-height:1.55;margin-top:6px}
+.settings-grid{gap:11px!important;margin-top:16px}.setting{padding:13px}.setting-label{font-size:10px;margin-bottom:7px}.setting p{display:block;font-size:10px;line-height:1.45}
+.toggle-pair button,.pixel-scale button,.hud-scale-setting button{font-size:10px;min-height:38px}
+.settings-section{margin-top:16px;padding-top:15px}.settings-section-title{font-size:11px;margin-bottom:10px}
+.range-setting{padding:13px}.range-head b{font-size:10px}.range-head span{font-size:11px}
+.keybind-grid{gap:8px}.keybind-row{grid-template-columns:1fr 124px;padding:9px 11px}.keybind-row span{font-size:10px}.keybind-button{min-height:35px;font-size:9px}
+.settings-note{font-size:10px;line-height:1.5;padding:9px 11px}.settings-actions .pixel-btn{font-size:10px!important;min-height:40px!important}
+
+/* Difficulty / pause / game-over: less billboard, more readable panel. */
+.difficulty-modal{width:min(920px,92vw);padding:26px 28px;border-width:4px}.difficulty-title{font-size:34px;margin-top:5px}.difficulty-sub{font-size:12px;margin-top:8px}
+.difficulty-cards{gap:13px;margin-top:22px}.difficulty-card{min-height:230px;padding:18px;border-width:3px}.difficulty-card b{font-size:19px}.difficulty-card small{font-size:10px;margin-top:7px}.difficulty-card p{font-size:11px;line-height:1.6;margin-top:14px}
+.difficulty-actions{gap:12px;margin-top:20px}.difficulty-actions button{min-width:220px;min-height:46px;font-size:11px}
+.modal{width:min(900px,92vw);padding:28px 30px;border-width:4px}.modal-title{font-size:31px}.modal-sub{font-size:13px;line-height:1.55;margin-top:8px}
+.pause-modal-wide{width:min(900px,92vw)!important}.pause-buttons,.over-buttons{gap:11px;margin-top:24px}.pause-buttons button,.over-buttons button{min-height:47px;padding:10px 18px;font-size:11px}
+.stats-grid{gap:9px;margin-top:22px}.stat-box{padding:14px 10px}.stat-box b{font-size:20px}.stat-box span{font-size:9px}
+
+/* Level-up: larger cards, clearer rarity and descriptions. */
+#levelScreen .modal{width:min(960px,94vw)}
+.upgrade-grid{gap:13px;margin-top:23px}.upgrade{min-height:215px;padding:18px;border-width:3px}.upgrade:before{right:10px;top:9px;font-size:9px;padding:4px 7px}.upgrade-icon{font-size:29px}.upgrade h3{font-size:16px;margin-top:12px}.upgrade p{font-size:12px;line-height:1.55;margin-top:8px}.upgrade small{font-size:10px;margin-top:12px}
+
+/* Permanent progression screen: narrower overall proportions, bigger text. */
+#heroUpgradeScreen{padding:18px}
+.hero-upgrade-shell{width:min(1120px,94vw);height:min(850px,94vh);grid-template-columns:350px minmax(0,1fr);border-width:4px}
+.upgrade-close{right:14px;top:12px;min-height:42px;font-size:11px;padding:8px 12px}
+.upgrade-hero-profile{padding:27px 24px}.upgrade-hero-name{font-size:35px}.upgrade-hero-role{font-size:11px}.upgrade-portrait-frame{width:min(270px,100%);margin:20px auto 17px}
+.upgrade-hero-lore{font-size:12px;line-height:1.65;padding:14px 2px}.upgrade-profile-meta{gap:9px;margin-top:14px}.upgrade-profile-meta span{font-size:10px;line-height:1.5;padding:10px}
+.upgrade-topbar{padding:18px 78px 0 18px}.upgrade-ticket{min-width:150px;padding:14px 20px 12px;font-size:11px}.upgrade-rune-bank{margin-bottom:10px}
+.upgrade-pane{padding:24px}.upgrade-pane-head h3,.owned-card-header h3{font-size:27px}.upgrade-pane-head p{font-size:11px;line-height:1.55;max-width:430px}
+.large-stat{padding:17px;margin-top:17px}.upgrade-stat-name{font-size:13px}.upgrade-stat-value{font-size:10px}.large-stat .upgrade-slot{height:29px}.upgrade-stat-footer>span{font-size:10px}.upgrade-stat-footer .upgrade-buy{min-width:200px;font-size:10px}
+.upgrade-special-summary b{font-size:15px}.upgrade-special-summary span{font-size:11px;line-height:1.55}
+.witch-stage{height:310px}.witch-dialogue{font-size:13px}.witch-deck-label span{font-size:11px}.witch-deck-label small{font-size:9px}.witch-buy{min-width:230px;font-size:11px}
+.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.collection-card{height:300px;padding:14px}.collection-card-name{font-size:15px}.collection-card-desc{font-size:11px;line-height:1.5}
+
+/* Card draft / card help / sell dialog. */
+.card-draft-shell{width:min(980px,94vw);height:min(760px,92vh)}.draft-title h2{font-size:34px}.draft-title p{font-size:12px;margin-top:8px}.deck-stage{height:570px}
+.draft-cards{gap:18px}.draft-card{width:255px;height:380px}.draft-rarity{font-size:10px}.draft-card-name{font-size:19px}.draft-card-art{height:125px}.draft-card-desc{font-size:11px;line-height:1.55}.draft-pick{font-size:10px}
+.card-tutorial-panel{width:min(960px,92vw);padding:28px}.card-tutorial-panel>h2{font-size:32px}.tutorial-intro{font-size:12px}.tutorial-step{min-height:250px;padding:14px}.tutorial-step h3{font-size:12px}.tutorial-step p{font-size:10px;line-height:1.55}.tutorial-cost-note{font-size:10px;line-height:1.55}
+.card-sell-panel{width:min(520px,90vw);padding:29px}.card-sell-panel h2{font-size:33px}.sell-card-name{font-size:19px}.sell-card-meta{font-size:11px}.card-sell-panel p{font-size:10px;line-height:1.55}
+
+/* Treasure reveal and item card. */
+.treasure-shell{width:min(860px,94vw)}
+#itemStage{width:min(590px,90vw);padding:27px 24px 24px}.treasure-name{font-size:26px}.treasure-desc{font-size:12px;line-height:1.6;max-width:500px}.rarity-label{font-size:11px}.treasure-actions button{min-width:210px;min-height:46px;font-size:11px}
+
+/* HUD: noticeably larger while preserving world scale. */
+.hud-top{top:14px;left:14px;right:14px;grid-template-columns:440px 1fr auto;gap:14px}
+.player-hud{grid-template-columns:64px 1fr;gap:12px;padding:10px 12px;min-height:98px}.hud-portrait{width:64px;height:64px}.hud-hero{font-size:15px}.hud-sub{font-size:10px;margin-top:3px}.hud-hp{font-size:11px}.bar-wrap{grid-template-columns:24px 1fr;gap:6px;margin-top:7px}.bar-label{font-size:9px}.bar{height:12px}.xp-bar{height:9px}.shield-wrap{grid-template-columns:24px minmax(0,1fr) 56px}.shield-bar{height:10px}.shield-text{font-size:8px}
+.center-hud{padding:10px 17px;gap:17px}.center-hud .wave{font-size:20px}.center-hud .wave span{font-size:8px}.timer{font-size:12px}.hud-env{min-width:132px;padding-left:13px}.hud-env b{font-size:9px}.hud-env small{font-size:8px}
+.economy-hud{padding:9px 12px;gap:10px}.coin-icon{width:32px;height:32px}.coin-value{font-size:20px}.coin-label{font-size:8px}.hud-runes .rune-value{font-size:15px}.hud-runes .rune-label{font-size:7px}
+#bossHud{top:92px;width:min(820px,76vw);padding:12px 16px 14px}.boss-sigil{width:43px;height:43px;font-size:21px}.boss-name-wrap>span{font-size:15px}.boss-name-wrap small{font-size:9px}.boss-phase-tag{font-size:9px;min-width:86px}.boss-hp-num{font-size:15px}.boss-bar{height:17px}
+.abilities{bottom:15px;gap:8px}.ability{min-width:142px;padding:9px 11px}.keycap{min-width:30px;height:30px;font-size:10px}.ability-name{font-size:11px}.ability-cd{font-size:10px;margin-top:3px}
+#interaction{bottom:102px;min-width:320px;padding:10px 14px}.interaction-title{font-size:11px}.interaction-sub{font-size:9px;margin-top:3px}
+#toast{top:16%}.toast-title{font-size:25px}.toast-sub{font-size:11px;margin-top:4px}
+#treasureStrip{right:14px;top:82px;grid-template-columns:repeat(2,66px);gap:8px;max-width:158px}.treasure-entry{width:66px;height:66px}.treasure-stack{font-size:9px}
+#treasureTooltip{width:290px;padding:12px 14px}.tooltip-name{font-size:13px}.tooltip-rarity{font-size:9px}.tooltip-desc{font-size:10px}.tooltip-flavor{font-size:9px}
+#bossWarning{min-width:min(590px,86vw);padding:15px 20px;grid-template-columns:72px 1fr}.boss-warning-skull{font-size:54px}.boss-warning-copy b{font-size:22px}.boss-warning-copy small{font-size:10px}
+
+/* Desktop/laptop breakpoints keep the layouts tall instead of stretched. */
+@media(max-width:1180px){
+ .menu-shell{width:min(1040px,96vw)}
+ .hero-grid-clean{grid-template-columns:repeat(2,minmax(0,1fr));max-width:820px;margin:0 auto}.hero-grid-clean .hero-card{min-height:390px}.hero-grid-clean .hero-preview-wrap{height:170px}
+ .hero-upgrade-shell{grid-template-columns:320px 1fr;width:96vw}
+ .hud-top{grid-template-columns:400px 1fr auto}
+}
+@media(max-width:850px){
+ .menu-shell{height:96vh;min-height:0;grid-template-rows:92px 52px 1fr}.menu-header{padding:14px 165px 12px 16px}.menu-title{font-size:38px}.menu-subtitle{font-size:9px}.menu-nav{height:52px}.menu-tab{min-width:0;flex:1;font-size:9px}.menu-panel{padding:10px}
+ .hero-grid-clean{grid-template-columns:1fr;max-width:520px}.hero-grid-clean .hero-card{min-height:410px}.hero-grid-clean .hero-preview-wrap{height:190px}
+ .settings-grid,.audio-settings-grid,.keybind-grid,.difficulty-cards{grid-template-columns:1fr!important}
+ .difficulty-card{min-height:0}.difficulty-modal{max-height:94vh;overflow:auto}
+ .hero-upgrade-shell{display:block;width:100vw;height:100vh;overflow:auto;border:0}.upgrade-hero-profile{border-right:0;border-bottom:4px solid #3d3931}.upgrade-workbench{overflow:visible}
+ .collection-grid{grid-template-columns:1fr}.draft-card{width:30vw;min-width:190px;height:345px}.draft-cards{gap:8px}
+ .hud-top{grid-template-columns:minmax(0,1fr) auto}.center-hud{display:none}.player-hud{max-width:380px}.economy-hud{padding:8px}.coin-label{display:none}#treasureStrip{display:none}
+}
+@media(max-width:620px){
+ #menuScreen{padding:0}.menu-shell{width:100vw;height:100vh;border:0;box-shadow:none;grid-template-rows:78px 48px 1fr}.menu-header{padding:11px 120px 8px 11px}.menu-title{font-size:29px}.menu-subtitle{font-size:7px;margin-top:5px}.menu-rune-bank{right:8px;bottom:8px;min-width:105px;padding:5px 7px}.menu-topline{right:9px;top:7px;font-size:7px}.menu-nav{height:48px;padding:5px}.menu-tab{font-size:8px;padding:5px 3px}.menu-panel{padding:7px}
+ #playPanel.active{grid-template-rows:minmax(220px,1fr) auto!important}.play-primary-row{grid-template-columns:1fr}.play-primary-row .start-btn{min-height:48px;font-size:12px}
+ .hero-panel-head{display:block}.hero-panel-runes{margin-top:10px;width:max-content}.hero-grid-clean .hero-card{min-height:365px}.hero-grid-clean .hero-preview-wrap{height:165px}.hero-name{font-size:16px}
+ .settings-card{padding:13px!important}.settings-card .panel-title{font-size:25px}
+ .modal{padding:18px 14px}.modal-title{font-size:25px}.upgrade-grid{grid-template-columns:1fr}.upgrade{min-height:0}
+ .stats-grid{grid-template-columns:repeat(2,1fr)}
+ .draft-cards{gap:4px}.draft-card{width:31vw;min-width:0;height:300px}.draft-card-name{font-size:13px}.draft-card-art{height:84px}.draft-card-desc{font-size:8px}.draft-pick{font-size:8px}
+ .player-hud{grid-template-columns:50px 1fr;max-width:310px;padding:7px}.hud-portrait{width:50px;height:50px}.hud-hero{font-size:12px}.hud-sub{font-size:8px}.hud-hp{font-size:9px}.bar{height:9px}.shield-wrap{grid-template-columns:20px 1fr 44px}.shield-text{font-size:6px}.economy-hud{gap:4px}.rune-display.hud-runes{display:none}
+ .abilities{bottom:6px}.ability{min-width:96px;padding:6px}.keycap{min-width:24px;height:25px}.ability-name{font-size:8px}.ability-cd{font-size:8px}#bossHud{top:68px;width:94vw;padding:8px 10px}.boss-phase-tag{display:none}.boss-name-wrap>span{font-size:11px}
+}
+
 </style>
 </head>
 <body>
@@ -696,7 +825,7 @@ class Projectile{
    else if(this.type==='cheese'){g.fillStyle='#d5b45d';poly(g,[[-9,-7],[10,0],[-9,7]]);g.fill();g.fillStyle='#8b7338';for(const [x,y,r] of [[-4,-2,2],[1,1,1.6],[-5,4,1.3]]){g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}}
    else if(this.type==='dragon_head'){g.save();g.scale(1.15,1.15);g.fillStyle='#5e2622';poly(g,[[21,0],[12,-13],[-2,-17],[-13,-12],[-21,-4],[-17,0],[-21,4],[-13,12],[-2,17],[12,13]]);g.fill();g.strokeStyle='#c26c48';g.lineWidth=3;g.stroke();g.fillStyle='#bb5c3d';poly(g,[[10,-10],[25,-18],[18,-5]]);g.fill();poly(g,[[10,10],[25,18],[18,5]]);g.fill();g.fillStyle='#e6d18d';poly(g,[[4,-14],[10,-24],[13,-12]]);g.fill();poly(g,[[4,14],[10,24],[13,12]]);g.fill();g.fillStyle='#ffda6b';g.fillRect(8,-7,5,4);g.fillRect(8,3,5,4);g.fillStyle='#2a1515';g.fillRect(10,-6,2,2);g.fillRect(10,4,2,2);g.fillStyle='#ff6a32';for(let k=0;k<3;k++)g.fillRect(-22-k*5,-3+k%2*3,9,4);g.restore()}
    else if(this.type==='spectral_blade'){g.fillStyle='#c9c0e5';poly(g,[[17,0],[1,-5],[-12,-3],[-20,0],[-12,3],[1,5]]);g.fill();g.fillStyle='#7f72a6';g.fillRect(-5,-2,11,4);g.strokeStyle='#f0eaff';g.lineWidth=1.5;g.stroke()}
-   else if(this.enemy||this.reflected){if(this.type==='necromancer_bolt'){g.fillStyle='#5f3a72';poly(g,[[12,0],[2,-7],[-10,-4],[-15,0],[-10,4],[2,7]]);g.fill();g.fillStyle='#b57be1';g.beginPath();g.arc(3,0,4,0,TAU);g.fill();g.fillStyle='#e4c1ff';g.fillRect(4,-1,4,2)}else if(this.type==='orc_fireball'){g.fillStyle='#6b2018';poly(g,[[13,0],[4,-8],[-7,-6],[-16,0],[-7,6],[4,8]]);g.fill();g.fillStyle='#e65f2d';g.beginPath();g.arc(3,0,6,0,TAU);g.fill();g.fillStyle='#ffb648';g.beginPath();g.arc(5,-1,3,0,TAU);g.fill();g.fillStyle='#ffe39a';g.fillRect(5,-1,4,2)}else if(this.type==='bone_earth_chunk'){const rr=this.r||28;g.fillStyle='#2d2928';poly(g,[[-rr*.95,-rr*.25],[-rr*.55,-rr*.86],[rr*.04,-rr],[rr*.72,-rr*.62],[rr,0],[rr*.65,rr*.7],[-rr*.15,rr],[-rr*.9,rr*.48]]);g.fill();g.strokeStyle='#171515';g.lineWidth=4;g.stroke();g.fillStyle='#5e4b40';poly(g,[[-rr*.55,-rr*.36],[-rr*.18,-rr*.7],[rr*.22,-rr*.54],[rr*.05,-rr*.08],[-rr*.42,0]]);g.fill();g.fillStyle='#7a6250';poly(g,[[rr*.18,-rr*.48],[rr*.62,-rr*.28],[rr*.54,rr*.18],[rr*.12,rr*.28],[-rr*.02,-rr*.08]]);g.fill();g.strokeStyle='#9b63b7';g.lineWidth=3;g.beginPath();g.moveTo(-rr*.6,-rr*.04);g.lineTo(-rr*.15,rr*.18);g.lineTo(rr*.18,-rr*.16);g.lineTo(rr*.6,rr*.1);g.stroke()}else if(this.type==='eclipse'){g.fillStyle='#6d495c';poly(g,[[10,0],[0,-6],[-8,0],[0,6]]);g.fill();g.fillStyle='#b08494';g.beginPath();g.arc(1,0,2.4,0,TAU);g.fill()}else if(this.type==='spirit'){g.fillStyle='#6f8091';g.beginPath();g.ellipse(0,0,8,5,0,0,TAU);g.fill();g.strokeStyle='#aab2b6';g.beginPath();g.moveTo(-8,0);g.quadraticCurveTo(-14,-5,-18,0);g.stroke()}else if(this.type==='voidfire'){g.fillStyle='#552268';poly(g,[[13,0],[2,-8],[-8,-5],[-15,0],[-8,5],[2,8]]);g.fill();g.fillStyle='#bd63e6';g.beginPath();g.arc(3,0,4,0,TAU);g.fill();g.fillStyle='#ead0ff';g.beginPath();g.arc(5,-1,1.8,0,TAU);g.fill()}else if(this.type==='dragon_shard'){g.fillStyle='#8f4dc1';poly(g,[[13,0],[0,-7],[-10,0],[0,7]]);g.fill();g.strokeStyle='#d39bff';g.lineWidth=2;g.stroke()}else if(this.type==='mutok_sword'){g.fillStyle='#ece4fb';g.fillRect(-30,-3,54,6);g.fillStyle='#bb8cff';g.fillRect(-4,-8,8,16);g.fillRect(8,-12,7,24);g.fillRect(20,-8,7,16);g.fillStyle='#6842ae';g.fillRect(18,-13,18,26);g.fillStyle='#362049';g.fillRect(-42,-5,14,10);g.fillStyle='#f6f0ff';g.fillRect(24,-1,22,2);g.fillStyle='#b975ff';g.fillRect(6,-15,5,30);g.fillRect(14,-10,4,20)}else if(this.type==='mutok_wave'){g.strokeStyle='#f6e8ff';g.lineWidth=4;g.beginPath();g.arc(0,0,16,-1.1,1.1);g.stroke();g.strokeStyle='#9258ee';g.lineWidth=l.width||2.5;g.beginPath();g.arc(0,0,21,-.95,.95);g.stroke();g.fillStyle='#c17eff';g.fillRect(10,-3,10,6);g.fillStyle='#8d53e4';g.fillRect(16,-5,6,10)}else if(this.type==='mutok_spear'){g.strokeStyle='#efe6ff';g.lineWidth=4;g.beginPath();g.moveTo(-22,0);g.lineTo(14,0);g.stroke();g.fillStyle='#c996ff';poly(g,[[22,0],[10,-7],[10,7]]);g.fill();g.fillStyle='#4d2d69';g.fillRect(-30,-3,9,6);g.fillStyle='#9761e0';g.fillRect(-4,-2,10,4);g.fillStyle='#f8f0ff';g.fillRect(10,-1,8,2)}else if(this.type==='mutok_reflect'){g.fillStyle='#b45eff';poly(g,[[18,0],[6,-12],[-14,-6],[-10,0],[-14,6],[6,12]]);g.fill();g.fillStyle='#f6eaff';g.fillRect(4,-2,10,4);g.fillStyle='#e5c9ff';g.fillRect(-3,-1,6,2)}else{g.fillStyle=this.color;g.beginPath();g.arc(0,0,this.r,0,TAU);g.fill()}}
+   else if(this.enemy||this.reflected){if(this.type==='necromancer_bolt'){g.fillStyle='#5f3a72';poly(g,[[12,0],[2,-7],[-10,-4],[-15,0],[-10,4],[2,7]]);g.fill();g.fillStyle='#b57be1';g.beginPath();g.arc(3,0,4,0,TAU);g.fill();g.fillStyle='#e4c1ff';g.fillRect(4,-1,4,2)}else if(this.type==='orc_fireball'){g.fillStyle='#6b2018';poly(g,[[13,0],[4,-8],[-7,-6],[-16,0],[-7,6],[4,8]]);g.fill();g.fillStyle='#e65f2d';g.beginPath();g.arc(3,0,6,0,TAU);g.fill();g.fillStyle='#ffb648';g.beginPath();g.arc(5,-1,3,0,TAU);g.fill();g.fillStyle='#ffe39a';g.fillRect(5,-1,4,2)}else if(this.type==='bone_earth_chunk'){const rr=this.r||28;g.fillStyle='#2d2928';poly(g,[[-rr*.95,-rr*.25],[-rr*.55,-rr*.86],[rr*.04,-rr],[rr*.72,-rr*.62],[rr,0],[rr*.65,rr*.7],[-rr*.15,rr],[-rr*.9,rr*.48]]);g.fill();g.strokeStyle='#171515';g.lineWidth=4;g.stroke();g.fillStyle='#5e4b40';poly(g,[[-rr*.55,-rr*.36],[-rr*.18,-rr*.7],[rr*.22,-rr*.54],[rr*.05,-rr*.08],[-rr*.42,0]]);g.fill();g.fillStyle='#7a6250';poly(g,[[rr*.18,-rr*.48],[rr*.62,-rr*.28],[rr*.54,rr*.18],[rr*.12,rr*.28],[-rr*.02,-rr*.08]]);g.fill();g.strokeStyle='#9b63b7';g.lineWidth=3;g.beginPath();g.moveTo(-rr*.6,-rr*.04);g.lineTo(-rr*.15,rr*.18);g.lineTo(rr*.18,-rr*.16);g.lineTo(rr*.6,rr*.1);g.stroke()}else if(this.type==='eclipse'){g.fillStyle='#6d495c';poly(g,[[10,0],[0,-6],[-8,0],[0,6]]);g.fill();g.fillStyle='#b08494';g.beginPath();g.arc(1,0,2.4,0,TAU);g.fill()}else if(this.type==='spirit'){g.fillStyle='#6f8091';g.beginPath();g.ellipse(0,0,8,5,0,0,TAU);g.fill();g.strokeStyle='#aab2b6';g.beginPath();g.moveTo(-8,0);g.quadraticCurveTo(-14,-5,-18,0);g.stroke()}else if(this.type==='voidfire'){g.fillStyle='#552268';poly(g,[[13,0],[2,-8],[-8,-5],[-15,0],[-8,5],[2,8]]);g.fill();g.fillStyle='#bd63e6';g.beginPath();g.arc(3,0,4,0,TAU);g.fill();g.fillStyle='#ead0ff';g.beginPath();g.arc(5,-1,1.8,0,TAU);g.fill()}else if(this.type==='dragon_shard'){g.fillStyle='#8f4dc1';poly(g,[[13,0],[0,-7],[-10,0],[0,7]]);g.fill();g.strokeStyle='#d39bff';g.lineWidth=2;g.stroke()}else if(this.type==='mutok_sword'){g.fillStyle='#ece4fb';g.fillRect(-30,-3,54,6);g.fillStyle='#bb8cff';g.fillRect(-4,-8,8,16);g.fillRect(8,-12,7,24);g.fillRect(20,-8,7,16);g.fillStyle='#6842ae';g.fillRect(18,-13,18,26);g.fillStyle='#362049';g.fillRect(-42,-5,14,10);g.fillStyle='#f6f0ff';g.fillRect(24,-1,22,2);g.fillStyle='#b975ff';g.fillRect(6,-15,5,30);g.fillRect(14,-10,4,20)}else if(this.type==='mutok_wave'){g.strokeStyle='#f6e8ff';g.lineWidth=4;g.beginPath();g.arc(0,0,16,-1.1,1.1);g.stroke();g.strokeStyle='#9258ee';g.lineWidth=2.5;g.beginPath();g.arc(0,0,21,-.95,.95);g.stroke();g.fillStyle='#c17eff';g.fillRect(10,-3,10,6);g.fillStyle='#8d53e4';g.fillRect(16,-5,6,10)}else if(this.type==='mutok_spear'){g.strokeStyle='#efe6ff';g.lineWidth=4;g.beginPath();g.moveTo(-22,0);g.lineTo(14,0);g.stroke();g.fillStyle='#c996ff';poly(g,[[22,0],[10,-7],[10,7]]);g.fill();g.fillStyle='#4d2d69';g.fillRect(-30,-3,9,6);g.fillStyle='#9761e0';g.fillRect(-4,-2,10,4);g.fillStyle='#f8f0ff';g.fillRect(10,-1,8,2)}else if(this.type==='mutok_reflect'){g.fillStyle='#b45eff';poly(g,[[18,0],[6,-12],[-14,-6],[-10,0],[-14,6],[6,12]]);g.fill();g.fillStyle='#f6eaff';g.fillRect(4,-2,10,4);g.fillStyle='#e5c9ff';g.fillRect(-3,-1,6,2)}else{g.fillStyle=this.color;g.beginPath();g.arc(0,0,this.r,0,TAU);g.fill()}}
    else{g.fillStyle=this.color;g.beginPath();g.arc(0,0,this.r,0,TAU);g.fill()}
    g.restore()
  }
