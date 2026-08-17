@@ -399,6 +399,64 @@ function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>1
 function poly(g,pts){g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);g.closePath()}
 function px(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
 function pxo(g,x,y,w,h,fill,outline='#202328'){px(g,x-1,y-1,w+2,h+2,outline);px(g,x,y,w,h,fill)}
+function drawSteppedDisk(g,cx,cy,r,step,color){
+ const radius=Math.max(step,Math.round(r)),cell=Math.max(4,Math.round(step)),top=Math.floor(-radius/cell)*cell;
+ g.fillStyle=color;
+ for(let oy=top;oy<radius;oy+=cell){
+  const y0=Math.max(-radius,oy),y1=Math.min(radius,oy+cell),edgeY=Math.max(Math.abs(y0),Math.abs(y1));
+  const half=Math.floor(Math.sqrt(Math.max(0,radius*radius-edgeY*edgeY))/cell)*cell;
+  if(half>0)g.fillRect(Math.round(cx-half),Math.round(cy+y0),Math.round(half*2),Math.ceil(y1-y0))
+ }
+}
+function drawSteppedFireZone(g,f,a,time,kind='dragon'){
+ const mortar=kind==='mortar',r=Math.max(36,f.r||180),step=mortar?24:22,seed=f.seed??(f.x*.117+f.y*.173),fade=clamp(a*1.55,0,1);
+ const outer=mortar?'#5a2923':'#5d275f',base=mortar?'#231819':'#231427',patch=mortar?'#3a2220':'#3b1b42',hot=mortar?'#a33c2d':'#ad3e83';
+ g.globalAlpha=(mortar?.76:.7)*fade;
+ drawSteppedDisk(g,f.x,f.y,r,step,outer);
+ drawSteppedDisk(g,f.x,f.y,r-step*.88,step,base);
+ const cells=Math.ceil((r-step*1.35)/step);
+ for(let iy=-cells;iy<=cells;iy++)for(let ix=-cells;ix<=cells;ix++){
+  const cx=ix*step,cy=iy*step,d=Math.hypot(cx,cy),h=visualHash(seed+ix*37.17+iy*53.31);
+  if(d>r-step*1.35)continue;
+  if(h<.235){g.fillStyle=patch;g.fillRect(Math.round(f.x+cx-step*.42),Math.round(f.y+cy-step*.42),Math.ceil(step*.84),Math.ceil(step*.84))}
+  else if(mortar&&h>.93){g.fillStyle='#4c4d4c';g.fillRect(Math.round(f.x+cx-step*.24),Math.round(f.y+cy-step*.18),Math.ceil(step*.48),Math.ceil(step*.36))}
+  else if(!mortar&&h>.94){g.fillStyle='#6b2b70';g.fillRect(Math.round(f.x+cx-step*.2),Math.round(f.y+cy-step*.2),Math.ceil(step*.4),Math.ceil(step*.4))}
+ }
+ g.globalAlpha=.82*fade;
+ const crackCount=mortar?13:11;
+ for(let i=0;i<crackCount;i++){
+  const ang=vrand(seed+i*71.9,0,TAU),bend=vrand(seed+i*29.7,-.18,.18),segments=4+(i%3);
+  for(let n=0;n<segments;n++){
+   const t=(n+1)/(segments+1),rr=r*(.13+t*.68),aa=ang+bend*t+Math.sin(i*2.1+n)*.035;
+   const xx=Math.round((f.x+Math.cos(aa)*rr)/4)*4,yy=Math.round((f.y+Math.sin(aa)*rr)/4)*4;
+   g.fillStyle=n%2?(mortar?'#d94d34':'#e157a5'):hot;
+   g.fillRect(xx-(mortar?6:5),yy-(mortar?3:4),mortar?12:10,mortar?6:8)
+  }
+ }
+ const flameCount=mortar?30:26,phase=Math.floor(time*8);
+ for(let k=0;k<flameCount;k++){
+  const ang=vrand(seed+k*41.3,0,TAU),rad=r*vrand(seed+k*67.1,.12,.72),bx=Math.round((f.x+Math.cos(ang)*rad)/4)*4,by=Math.round((f.y+Math.sin(ang)*rad)/4)*4;
+  const flick=(phase+k)%3,h=15+flick*5+(k%4)*2,w=10+(k%3)*2;
+  g.fillStyle=mortar?(flick===0?'#c8452f':'#ed6a35'):(flick===0?'#ae3f8c':'#d85b76');
+  g.fillRect(bx-w/2,by-h,w,h);
+  g.fillStyle=mortar?'#ff9b42':'#f08a74';g.fillRect(bx-w*.3,by-h+5,w*.6,Math.max(7,h-8));
+  g.fillStyle=mortar?'#ffd86b':'#ffd09b';g.fillRect(bx-2,by-h+8,4,Math.max(4,h-13))
+ }
+ if(mortar){
+  g.globalAlpha=.42*fade;
+  for(let i=0;i<10;i++){
+   const ang=vrand(seed+i*83.2,0,TAU),rad=r*vrand(seed+i*19.4,.16,.63),rise=((time*.34+i*.13)%1)*26;
+   const sx=Math.round((f.x+Math.cos(ang)*rad)/6)*6,sy=Math.round((f.y+Math.sin(ang)*rad-rise)/6)*6,size=10+(i%3)*5;
+   g.fillStyle=i%2?'#4b4845':'#29292a';g.fillRect(sx-size/2,sy-size/2,size,size)
+  }
+ }else{
+  g.globalAlpha=.6*fade;g.fillStyle='#d461c2';
+  for(let i=0;i<6;i++){
+   const ang=i/6*TAU+vrand(seed+i*13.1,-.14,.14),rad=r*(.36+(i%2)*.18),sx=Math.round((f.x+Math.cos(ang)*rad)/6)*6,sy=Math.round((f.y+Math.sin(ang)*rad)/6)*6;
+   g.fillRect(sx-10,sy-3,20,6);g.fillRect(sx-3,sy-10,6,20);g.fillStyle=i%2?'#f08ab8':'#9c43b1'
+  }
+ }
+}
 function facingDir(a){const n=((a%TAU)+TAU)%TAU;if(n>=Math.PI*.25&&n<Math.PI*.75)return'down';if(n>=Math.PI*.75&&n<Math.PI*1.25)return'left';if(n>=Math.PI*1.25&&n<Math.PI*1.75)return'up';return'right'}
 function drawPixelShadow(g,w=22,h=8,ox=0,oy=12,col='rgba(0,0,0,.26)'){px(g,ox-w/2,oy-h/2,w,h,col);px(g,ox-w/2+2,oy-h/2-2,w-4,h+4,col)}
 function pickWeighted(entries){const total=entries.reduce((s,e)=>s+Math.max(0,e[1]),0);let r=Math.random()*Math.max(.0001,total);for(const [k,w] of entries){r-=Math.max(0,w);if(r<=0)return k}return entries[entries.length-1][0]}
@@ -1042,7 +1100,7 @@ class Enemy{
    g.particles.push(new Particle(this.x+Math.cos(a)*34,this.y-52+Math.sin(a)*12,smoke?(k%2?'#686b6d':'#3a3d40'):'#d48a51',{life:rand(.42,1.05),size:rand(smoke?5:2,smoke?13:5),vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp-rand(45,145),drag:smoke?1.9:2.8,shape:smoke?'dot':'spark'}))
   }
   const impactLife=.88,startDelay=2.35;
-  g.fields.push({type:'mortal_mortar_shell',x:targetX,y:targetY,sourceX:this.x,sourceY:this.y,r:320,shellR:39,life:startDelay+impactLife,max:startDelay+impactLife,delay:startDelay,startDelay,impactLife,damage:this.damage,owner:this,tick:0})
+  g.fields.push({type:'mortal_mortar_shell',x:targetX,y:targetY,sourceX:this.x,sourceY:this.y,r:380,shellR:39,life:startDelay+impactLife,max:startDelay+impactLife,delay:startDelay,startDelay,impactLife,damage:this.damage,owner:this,tick:0})
  }
  updateWizardTower(dt){
   const g=this.game,p=g.player;
@@ -1779,10 +1837,10 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
       const p=this.player,exposure=this.explosionExposure(f.x,f.y,p);
       if(dist2(f,p)<sq(f.r+p.r))p.takeDamage((f.damage||54)*exposure,{type:'explosion'});
       this.spawnWaterShockwave(f.x,f.y,f.r*.88,{kind:'impact',life:1.02});
+      // Área própria do morteiro: círculo em blocos, com o mesmo raio efetivo da explosão.
+      this.fields.push({type:'mortal_mortar_inferno',x:f.x,y:f.y,r:f.r,life:8.8,max:8.8,tick:0,seed:f.x*.117+f.y*.173});
+      // A cratera é desenhada depois do fogo para continuar visível no centro do impacto.
       this.fields.push({type:'mortal_mortar_crater',x:f.x,y:f.y,r:f.r*.48,life:5.8,max:5.8,tick:0});
-      // O impacto do morteiro reaproveita o mesmo inferno persistente do raio cataclísmico do dragão.
-      // O raio permanece exatamente igual ao raio efetivo da explosão do morteiro.
-      this.fields.push({type:'dragon_inferno',source:'mortal_mortar',x:f.x,y:f.y,r:f.r,life:8.8,max:8.8,tick:0});
       for(let k=0;k<58&&this.particles.length<MAX_PARTICLES;k++){
        const aa=k/58*TAU+rand(-.18,.18),sp=rand(145,530),rock=k%4!==0;
        this.particles.push(new Particle(f.x+rand(-18,18),f.y+rand(-18,18),rock?(k%2?'#777b7e':'#34373a'):'#d65355',{life:rand(.48,1.35),size:rand(rock?4:2,rock?13:7),vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp-rand(80,310),drag:rand(1.3,2.5),shape:rock?(k%3?'dot':'spark'):'spark'}))
@@ -1837,8 +1895,8 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
      else if(f.type==='dragon_fire'&&f.tick<=0){f.tick=.46;if(ellipseCircleHit(f.x,f.y,f.r,f.r*.62,this.player))this.player.takeDamage(f.damage||18,{type:'voidfire'})}
      else if(f.type==='dragon_rift'&&f.tick<=0){f.tick=.55;if(dist2(f,this.player)<sq(f.r+this.player.r))this.player.takeDamage(f.damage||16)}
      else if(f.type==='dragon_cataclysm_beam'){f.elapsed=(f.elapsed||0)+dt;f.currentLength=Math.min(f.targetLength,(f.frontSpeed||2200)*f.elapsed);const liveHit=!f.playerDamaged?this.beamPlayerDistance(f.x,f.y,f.angle,f.currentLength,f.width):null;if(!f.playerDamaged&&liveHit!=null){f.playerDamaged=true;if(this.player.takeDamage(f.beamDamage||48,{type:'voidfire'}))this.player.applyBurn(2.8,4.2);this.shake(9)}if(!f.impactTriggered&&f.currentLength>=f.targetLength-.5)this.triggerDragonBeamImpact(f)}
-     else if(f.type==='dragon_cataclysm_blast'&&f.delay<=0&&!f.triggered){f.triggered=true;audio.playSfx('explosao',{volume:1,throttle:0});this.spawnWaterShockwave(f.x,f.y,f.r*.8,{kind:'impact',life:.9});const p=this.player,exposure=this.explosionExposure(f.x,f.y,p);if(dist2(f,p)<sq(f.r+p.r)&&p.takeDamage((f.damage||70)*exposure,{type:'explosion'}))p.applyBurn(5.2,5);this.destroyObstaclesInRadius(f.x,f.y,f.r*.34);this.fields.push({type:'dragon_inferno',x:f.x,y:f.y,r:f.r*.98,life:8.8,max:8.8,tick:0});this.fields.push({type:'dragon_nuclear_cloud',x:f.x,y:f.y,r:f.r*1.16,life:2.1,max:2.1,tick:0});const count=f.spawnCount||4;for(let n=0;n<count;n++){if(this.enemies.length>=MAX_ENEMIES)break;const a=n/count*TAU+rand(-.35,.35),d=rand(35,f.r*.72),x=clamp(f.x+Math.cos(a)*d,30,this.world.w-30),y=clamp(f.y+Math.sin(a)*d,30,this.world.h-30);if(this.pointBlocked(x,y,16))continue;const m=new Enemy(this,'lava_minion',x,y,this.wave);m.maxHp=m.hp=28*(1+this.wave*.025)*this.diff.enemyHp;this.enemies.push(m)}for(let k=0;k<36&&this.particles.length<MAX_PARTICLES;k++)this.particles.push(new Particle(f.x,f.y,k%3?'#e04b2f':'#f3a548',{life:rand(.5,1.25),size:rand(3,8),vx:rand(-340,340),vy:rand(-360,150),shape:'spark'}));this.shake(20)}
-     else if(f.type==='dragon_inferno'&&f.tick<=0){f.tick=.62;const inside=f.source==='mortal_mortar'?dist2(f,this.player)<sq(f.r+this.player.r):ellipseCircleHit(f.x,f.y,f.r,f.r*.64,this.player);if(inside&&this.player.takeDamage(7,{type:'fire'}))this.player.applyBurn(3.6,4.5)}
+     else if(f.type==='dragon_cataclysm_blast'&&f.delay<=0&&!f.triggered){f.triggered=true;audio.playSfx('explosao',{volume:1,throttle:0});this.spawnWaterShockwave(f.x,f.y,f.r*.8,{kind:'impact',life:.9});const p=this.player,exposure=this.explosionExposure(f.x,f.y,p);if(dist2(f,p)<sq(f.r+p.r)&&p.takeDamage((f.damage||70)*exposure,{type:'explosion'}))p.applyBurn(5.2,5);this.destroyObstaclesInRadius(f.x,f.y,f.r*.34);this.fields.push({type:'dragon_inferno',x:f.x,y:f.y,r:f.r,life:8.8,max:8.8,tick:0,seed:f.x*.193+f.y*.131});this.fields.push({type:'dragon_nuclear_cloud',x:f.x,y:f.y,r:f.r*1.16,life:2.1,max:2.1,tick:0});const count=f.spawnCount||4;for(let n=0;n<count;n++){if(this.enemies.length>=MAX_ENEMIES)break;const a=n/count*TAU+rand(-.35,.35),d=rand(35,f.r*.72),x=clamp(f.x+Math.cos(a)*d,30,this.world.w-30),y=clamp(f.y+Math.sin(a)*d,30,this.world.h-30);if(this.pointBlocked(x,y,16))continue;const m=new Enemy(this,'lava_minion',x,y,this.wave);m.maxHp=m.hp=28*(1+this.wave*.025)*this.diff.enemyHp;this.enemies.push(m)}for(let k=0;k<36&&this.particles.length<MAX_PARTICLES;k++)this.particles.push(new Particle(f.x,f.y,k%3?'#e04b2f':'#f3a548',{life:rand(.5,1.25),size:rand(3,8),vx:rand(-340,340),vy:rand(-360,150),shape:'spark'}));this.shake(20)}
+     else if((f.type==='dragon_inferno'||f.type==='mortal_mortar_inferno')&&f.tick<=0){f.tick=.62;const inside=dist2(f,this.player)<sq(f.r+this.player.r);if(inside&&this.player.takeDamage(7,{type:'fire'}))this.player.applyBurn(3.6,4.5)}
      else if(f.type==='lava_burst'&&!f.triggered){f.triggered=true}
      else if(f.type==='dragon_nuclear_cloud'&&!f.triggered){f.triggered=true}
      else if((f.type==='explosion'||f.type==='cheese')&&!f.triggered){f.triggered=true;if(f.type==='explosion'){audio.playSfx('explosao',{volume:.7});this.spawnWaterShockwave(f.x,f.y,f.r*.65,{kind:'impact'})}for(const e of this.enemies)if(dist2(f,e)<sq(f.r+e.r)){e.takeDamage((f.damage||50)*this.player.currentDamageMul(),{slip:f.type==='cheese'?4:0});if(f.type==='cheese')e.slip=Math.max(e.slip,4)}}
@@ -1948,7 +2006,8 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
    else if(f.type==='dragon_cataclysm_beam'){const L=f.currentLength||0,w=f.width||78;g.translate(f.x,f.y);g.rotate(f.angle);g.globalAlpha=.96;for(let x=0;x<L;x+=24){g.fillStyle=(Math.floor(x/24)%2)?'#9d3fc3':'#722996';g.fillRect(x,-w*.48,22,w*.96)}g.fillStyle='#d36aee';g.fillRect(0,-w*.27,L,w*.54);g.fillStyle='#ffe6ff';g.fillRect(0,-w*.09,L,w*.18);if(L>18){const ix=Math.max(0,L-18);g.fillStyle='#f7b0ff';g.fillRect(ix,-w*.58,18,w*1.16);g.fillStyle='#ffffff';g.fillRect(ix+5,-w*.3,12,w*.6)}for(let i=0;i<5;i++){const x=Math.max(12,L-(i+1)*42),yy=Math.sin(this.time*14+i*2.1)*w*.34;g.fillStyle=i%2?'#ef9dff':'#b953db';g.fillRect(x,yy-3,8,6)}}
    else if(f.type==='dragon_cataclysm_blast'){if((f.delay??0)>0){const p=clamp(1-f.delay/.55,0,1);g.globalAlpha=.75;g.strokeStyle='#ef8cff';g.lineWidth=5;g.beginPath();g.arc(f.x,f.y,30+p*f.r*.55,0,TAU);g.stroke();g.fillStyle='rgba(211,73,236,.18)';g.fillRect(f.x-18-p*34,f.y-18-p*34,36+p*68,36+p*68)}else{const p=1-a;g.globalAlpha=.85*a;const rr=f.r*(.38+p*.72);g.fillStyle='#4a173f';g.fillRect(f.x-rr*.72,f.y-rr*.35,rr*1.44,rr*.7);g.fillStyle='#b63e73';g.fillRect(f.x-rr*.48,f.y-rr*.48,rr*.96,rr*.96);g.fillStyle='#f07b5b';g.fillRect(f.x-rr*.26,f.y-rr*.62,rr*.52,rr*1.24);g.fillStyle='#ffe0a0';g.fillRect(f.x-rr*.1,f.y-rr*.7,rr*.2,rr*1.4)}}
    else if(f.type==='dragon_nuclear_cloud'){const p=1-a,r=f.r||190,stemH=36+p*95,capW=46+p*r*.82,capY=f.y-stemH;g.globalAlpha=.8*a;g.fillStyle='#5b2c2c';g.fillRect(f.x-14,f.y-stemH,28,stemH);g.fillStyle='#9e4936';g.fillRect(f.x-9,f.y-stemH,18,stemH);g.fillStyle='#77313b';g.fillRect(f.x-capW/2,capY-22-p*18,capW,22+p*18);g.fillStyle='#c45c3c';g.fillRect(f.x-capW*.36,capY-35-p*20,capW*.72,24+p*16);g.fillStyle='#e79551';g.fillRect(f.x-capW*.18,capY-43-p*22,capW*.36,18+p*12)}
-   else if(f.type==='dragon_inferno'){g.globalAlpha=.5*a;const r=f.r;g.fillStyle='#3e1717';g.fillRect(f.x-r*.72,f.y-r*.42,r*1.44,r*.84);for(let k=0;k<14;k++){const aa=k/14*TAU+this.time*.25,rr=r*(.16+(k%4)*.16),xx=f.x+Math.cos(aa)*rr,yy=f.y+Math.sin(aa)*rr*.58,fl=(k+Math.floor(this.time*6))%3;g.fillStyle=fl?'#c6462d':'#f3913e';g.fillRect(xx-5,yy-8-fl*3,10,16+fl*4);g.fillStyle='#ffd05c';g.fillRect(xx-2,yy-5-fl*2,4,8+fl*2)}}
+   else if(f.type==='dragon_inferno'){drawSteppedFireZone(g,f,a,this.time,'dragon')}
+   else if(f.type==='mortal_mortar_inferno'){drawSteppedFireZone(g,f,a,this.time,'mortar')}
    else if(f.type==='lava_burst'){const p=1-a,rr=f.r*(.35+p*.8);g.globalAlpha=.8*a;g.fillStyle='#922f28';g.fillRect(f.x-rr*.55,f.y-rr*.55,rr*1.1,rr*1.1);g.fillStyle='#f16b32';g.fillRect(f.x-rr*.28,f.y-rr*.7,rr*.56,rr*1.4);g.fillStyle='#ffd05a';g.fillRect(f.x-rr*.1,f.y-rr*.48,rr*.2,rr*.96)}
    else if(f.type==='dragon_meteor'){if((f.delay??0)>0){g.globalAlpha=.82;g.fillStyle='rgba(103,45,132,.18)';g.beginPath();g.arc(f.x,f.y,f.r,0,TAU);g.fill();g.strokeStyle='#c16be0';g.lineWidth=3;g.setLineDash([8,5]);g.beginPath();g.arc(f.x,f.y,f.r,0,TAU);g.stroke();g.setLineDash([]);g.strokeStyle='#8c4ca8';g.beginPath();g.moveTo(f.x-38,f.y-105);g.lineTo(f.x,f.y);g.stroke()}else{g.globalAlpha=.62*a;g.fillStyle='#5a296f';g.beginPath();g.arc(f.x,f.y,f.r*(1.1-a*.15),0,TAU);g.fill();g.strokeStyle='#d17bea';g.lineWidth=6;g.stroke()}}
    else if(f.type==='dragon_fire'){g.globalAlpha=.5*a;g.fillStyle='#51215f';g.beginPath();g.ellipse(f.x,f.y,f.r,f.r*.6,0,0,TAU);g.fill();g.strokeStyle='#a94bca';g.lineWidth=3;for(let k=0;k<5;k++){const aa=k/5*TAU+this.time*.8;g.beginPath();g.moveTo(f.x+Math.cos(aa)*f.r*.25,f.y+Math.sin(aa)*f.r*.16);g.lineTo(f.x+Math.cos(aa)*f.r*.85,f.y+Math.sin(aa)*f.r*.5);g.stroke()}}
@@ -1963,7 +2022,7 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
 }
 
 const game=new Game();
-window.__HB_GAME=game;window.__HB_VERSION='V17.2-MORTAR-INFERNO';window.__HB_TREASURES=TREASURES;
+window.__HB_GAME=game;window.__HB_VERSION='V17.3-FIRE-ZONES';window.__HB_TREASURES=TREASURES;
 let selectedHero='pyromancer',selectedDiff='normal',activeUpgradeHero='pyromancer',activeUpgradeTab='stats';const heroGrid=$('#heroGrid');
 function heroCard(k){return heroGrid.querySelector(`.hero-card[data-hero="${k}"]`)}
 function updateLaunchHero(){const h=HEROES[selectedHero],el=$('#difficultyHeroName');if(el)el.textContent=h.name}
