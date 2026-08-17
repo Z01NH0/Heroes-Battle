@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Heroes Battle: Rune Deck Reforged V17.1 Mortar Rework</title>
+<title>Heroes Battle: Rune Deck Reforged V17.2 Mortar Inferno</title>
 <style>
 
 :root{
@@ -1780,6 +1780,9 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
       if(dist2(f,p)<sq(f.r+p.r))p.takeDamage((f.damage||54)*exposure,{type:'explosion'});
       this.spawnWaterShockwave(f.x,f.y,f.r*.88,{kind:'impact',life:1.02});
       this.fields.push({type:'mortal_mortar_crater',x:f.x,y:f.y,r:f.r*.48,life:5.8,max:5.8,tick:0});
+      // O impacto do morteiro reaproveita o mesmo inferno persistente do raio cataclísmico do dragão.
+      // O raio permanece exatamente igual ao raio efetivo da explosão do morteiro.
+      this.fields.push({type:'dragon_inferno',source:'mortal_mortar',x:f.x,y:f.y,r:f.r,life:8.8,max:8.8,tick:0});
       for(let k=0;k<58&&this.particles.length<MAX_PARTICLES;k++){
        const aa=k/58*TAU+rand(-.18,.18),sp=rand(145,530),rock=k%4!==0;
        this.particles.push(new Particle(f.x+rand(-18,18),f.y+rand(-18,18),rock?(k%2?'#777b7e':'#34373a'):'#d65355',{life:rand(.48,1.35),size:rand(rock?4:2,rock?13:7),vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp-rand(80,310),drag:rand(1.3,2.5),shape:rock?(k%3?'dot':'spark'):'spark'}))
@@ -1835,7 +1838,7 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
      else if(f.type==='dragon_rift'&&f.tick<=0){f.tick=.55;if(dist2(f,this.player)<sq(f.r+this.player.r))this.player.takeDamage(f.damage||16)}
      else if(f.type==='dragon_cataclysm_beam'){f.elapsed=(f.elapsed||0)+dt;f.currentLength=Math.min(f.targetLength,(f.frontSpeed||2200)*f.elapsed);const liveHit=!f.playerDamaged?this.beamPlayerDistance(f.x,f.y,f.angle,f.currentLength,f.width):null;if(!f.playerDamaged&&liveHit!=null){f.playerDamaged=true;if(this.player.takeDamage(f.beamDamage||48,{type:'voidfire'}))this.player.applyBurn(2.8,4.2);this.shake(9)}if(!f.impactTriggered&&f.currentLength>=f.targetLength-.5)this.triggerDragonBeamImpact(f)}
      else if(f.type==='dragon_cataclysm_blast'&&f.delay<=0&&!f.triggered){f.triggered=true;audio.playSfx('explosao',{volume:1,throttle:0});this.spawnWaterShockwave(f.x,f.y,f.r*.8,{kind:'impact',life:.9});const p=this.player,exposure=this.explosionExposure(f.x,f.y,p);if(dist2(f,p)<sq(f.r+p.r)&&p.takeDamage((f.damage||70)*exposure,{type:'explosion'}))p.applyBurn(5.2,5);this.destroyObstaclesInRadius(f.x,f.y,f.r*.34);this.fields.push({type:'dragon_inferno',x:f.x,y:f.y,r:f.r*.98,life:8.8,max:8.8,tick:0});this.fields.push({type:'dragon_nuclear_cloud',x:f.x,y:f.y,r:f.r*1.16,life:2.1,max:2.1,tick:0});const count=f.spawnCount||4;for(let n=0;n<count;n++){if(this.enemies.length>=MAX_ENEMIES)break;const a=n/count*TAU+rand(-.35,.35),d=rand(35,f.r*.72),x=clamp(f.x+Math.cos(a)*d,30,this.world.w-30),y=clamp(f.y+Math.sin(a)*d,30,this.world.h-30);if(this.pointBlocked(x,y,16))continue;const m=new Enemy(this,'lava_minion',x,y,this.wave);m.maxHp=m.hp=28*(1+this.wave*.025)*this.diff.enemyHp;this.enemies.push(m)}for(let k=0;k<36&&this.particles.length<MAX_PARTICLES;k++)this.particles.push(new Particle(f.x,f.y,k%3?'#e04b2f':'#f3a548',{life:rand(.5,1.25),size:rand(3,8),vx:rand(-340,340),vy:rand(-360,150),shape:'spark'}));this.shake(20)}
-     else if(f.type==='dragon_inferno'&&f.tick<=0){f.tick=.62;if(ellipseCircleHit(f.x,f.y,f.r,f.r*.64,this.player)&&this.player.takeDamage(7,{type:'fire'}))this.player.applyBurn(3.6,4.5)}
+     else if(f.type==='dragon_inferno'&&f.tick<=0){f.tick=.62;const inside=f.source==='mortal_mortar'?dist2(f,this.player)<sq(f.r+this.player.r):ellipseCircleHit(f.x,f.y,f.r,f.r*.64,this.player);if(inside&&this.player.takeDamage(7,{type:'fire'}))this.player.applyBurn(3.6,4.5)}
      else if(f.type==='lava_burst'&&!f.triggered){f.triggered=true}
      else if(f.type==='dragon_nuclear_cloud'&&!f.triggered){f.triggered=true}
      else if((f.type==='explosion'||f.type==='cheese')&&!f.triggered){f.triggered=true;if(f.type==='explosion'){audio.playSfx('explosao',{volume:.7});this.spawnWaterShockwave(f.x,f.y,f.r*.65,{kind:'impact'})}for(const e of this.enemies)if(dist2(f,e)<sq(f.r+e.r)){e.takeDamage((f.damage||50)*this.player.currentDamageMul(),{slip:f.type==='cheese'?4:0});if(f.type==='cheese')e.slip=Math.max(e.slip,4)}}
@@ -1960,7 +1963,7 @@ triggerDragonBeamImpact(f){if(f.impactTriggered)return;f.impactTriggered=true;co
 }
 
 const game=new Game();
-window.__HB_GAME=game;window.__HB_VERSION='V17-BESTIARY-EXPANSION';window.__HB_TREASURES=TREASURES;
+window.__HB_GAME=game;window.__HB_VERSION='V17.2-MORTAR-INFERNO';window.__HB_TREASURES=TREASURES;
 let selectedHero='pyromancer',selectedDiff='normal',activeUpgradeHero='pyromancer',activeUpgradeTab='stats';const heroGrid=$('#heroGrid');
 function heroCard(k){return heroGrid.querySelector(`.hero-card[data-hero="${k}"]`)}
 function updateLaunchHero(){const h=HEROES[selectedHero],el=$('#difficultyHeroName');if(el)el.textContent=h.name}
