@@ -1055,12 +1055,46 @@ class Player{
 function drawHeroModel(g,key,x,y,facing=0,scale=1,player=null){
  const dir=facingDir(facing),blink=(Math.floor(performance.now()/220)%14===0),walk=!!(player&&player.moving&&(Math.floor(performance.now()/120)%2)),specialAnim=!!(player&&player.specialAnimTimer>0),hideWeapon=!!(player&&specialAnim&&['pyromancer_cast','ranger_volley','storm_staff_orbit'].includes(player.specialAnim)),cast=player&&(specialAnim||(player.specialActive>0&&key!=='knight')||player.attackHaste>0),pal={
   pyromancer:{skin:'#d6c3a1',hair:'#573524',main:'#ae4b38',mid:'#7d3125',dark:'#4d1e17',trim:'#eea85f',metal:'#d0cab8',weapon:'staff',orb:'#ffcb69'},
-  ranger:{skin:'#d7c59f',hair:'#4c3a24',main:'#58774b',mid:'#37503a',dark:'#24352c',trim:'#c2a35b',metal:'#d5d3c6',weapon:'bow',orb:'#a9d07f'},
-  knight:{skin:'#c7b28e',hair:'#30251f',main:'#667077',mid:'#485259',dark:'#2e353b',trim:'#b7a16a',metal:'#d7d5cf',weapon:'blade',orb:'#d7d5cf'},
-  storm:{skin:'#d2c0a1',hair:'#3b3b51',main:'#667f98',mid:'#4b6178',dark:'#2c3849',trim:'#aab6d7',metal:'#dee4ee',weapon:'storm',orb:'#d9ecff'}
+  ranger:{skin:'#d7c59f',hair:'#4c3a24',main:'#4f7443',mid:'#35553a',dark:'#24352c',trim:'#c2a35b',metal:'#d5d3c6',weapon:'bow',orb:'#a9d07f'},
+  knight:{skin:'#c7b28e',hair:'#30251f',main:'#434a54',mid:'#2c3138',dark:'#171a1f',trim:'#b7a16a',metal:'#aeb8c3',weapon:'blade',orb:'#d7d5cf'},
+  storm:{skin:'#d2c0a1',hair:'#3b3b51',main:'#556e88',mid:'#384d68',dark:'#212f42',trim:'#aab6d7',metal:'#dee4ee',weapon:'storm',orb:'#d9ecff'}
  }[key]||{skin:'#d6c3a1',hair:'#4a3527',main:'#777',mid:'#555',dark:'#333',trim:'#d4b26b',metal:'#ddd',weapon:'staff',orb:'#fff'};
  const outline='#1d2024',eye=blink?pal.skin:'#1f1d1c';
  g.save();g.translate(x,y);g.scale(scale,scale);
+ const drawBurnOverlay=()=>{if(player?.burn>0){const flick=Math.floor(performance.now()/90)%3;px(g,-11,5-flick,3,7,'#d14c2d');px(g,-8,1+flick,3,8,'#ff9a3d');px(g,8,4+flick,3,7,'#e45c2d');px(g,11,1-flick,2,6,'#ffc054')}};
+ const drawBow=()=>{pxo(g,10,-12,3,18,'#7a5737',outline);px(g,13,-10,1,14,'#e4e1d2');px(g,7,-5,4,2,pal.trim)};
+ const drawBlade=()=>{px(g,10,-19,3,29,pal.metal);pxo(g,7,5,9,3,pal.trim,outline);px(g,8,-21,7,2,'#f7f4e9')};
+ const drawStormStaff=()=>{px(g,10,-18,2,28,'#68829a');pxo(g,7,-22,8,6,pal.orb,outline);px(g,11,-24,2,2,'#ffffff');px(g,14,-19,2,2,pal.trim)};
+
+ const drawRanger=()=>{
+  const hoodDark='#24352c',hoodMid='#35553a',cloak='#4f7443',cloakDark='#2f4532',leather='#6a5032';
+  const drawDown=()=>{drawPixelShadow(g,22,8,0,14);pxo(g,-8,-19,16,5,hoodDark,outline);pxo(g,-10,-15,20,6,hoodMid,outline);pxo(g,-5,-11,10,7,pal.skin,outline);if(!blink){px(g,-2,-8,2,2,eye);px(g,1,-8,2,2,eye)}pxo(g,-10,-4,20,5,hoodMid,outline);pxo(g,-9,0,18,12,cloak,outline);px(g,-7,4,14,2,pal.trim);pxo(g,-12,-2,4,9,cloakDark,outline);pxo(g,8,-2,4,9,cloakDark,outline);pxo(g,10,-11,4,11,leather,outline);px(g,11,-8,2,2,pal.metal);pxo(g,-6,10,4,5+walk,'#2d322f',outline);pxo(g,2,10,4,6-walk,'#2d322f',outline);px(g,-6,15+walk,4,2,pal.metal);px(g,2,15-walk,4,2,pal.metal)};
+  const drawUp=()=>{drawPixelShadow(g,22,8,0,14);pxo(g,-8,-19,16,5,hoodDark,outline);pxo(g,-10,-15,20,6,hoodMid,outline);pxo(g,-6,-11,12,8,hoodDark,outline);pxo(g,-10,-4,20,5,cloakDark,outline);pxo(g,-9,0,18,12,cloak,outline);px(g,-7,4,14,2,pal.trim);pxo(g,-12,-2,4,9,cloakDark,outline);pxo(g,8,-2,4,9,cloakDark,outline);pxo(g,-13,-9,4,11,leather,outline);px(g,-12,-6,2,2,pal.metal);pxo(g,-6,10,4,5+walk,'#2d322f',outline);pxo(g,2,10,4,6-walk,'#2d322f',outline);px(g,-6,15+walk,4,2,pal.metal);px(g,2,15-walk,4,2,pal.metal)};
+  const drawSide=()=>{drawPixelShadow(g,22,8,0,14);pxo(g,-7,-19,14,5,hoodDark,outline);pxo(g,-8,-15,16,6,hoodMid,outline);pxo(g,-4,-11,8,7,pal.skin,outline);if(!blink)px(g,1,-8,2,2,eye);pxo(g,-9,-4,18,5,hoodMid,outline);pxo(g,-8,0,16,12,cloak,outline);px(g,-5,4,10,2,pal.trim);pxo(g,8,-1,4,8,cloakDark,outline);pxo(g,-6,10,4,5+walk,'#2d322f',outline);pxo(g,0,10,4,6-walk,'#2d322f',outline);px(g,-6,15+walk,4,2,pal.metal);px(g,0,15-walk,4,2,pal.metal);pxo(g,-12,-7,4,10,leather,outline)};
+  if(dir==='down'){drawDown();if(!hideWeapon)drawBow()}else if(dir==='up'){drawUp();if(!hideWeapon)drawBow()}else{g.save();if(dir==='left')g.scale(-1,1);drawSide();if(!hideWeapon)drawBow();g.restore()}
+ };
+
+ const drawKnight=()=>{
+  const helm=pal.dark,helmMid=pal.mid,armor=pal.main,steel=pal.metal,horn='#bfa46d',visor='#bb4d55';
+  const drawDown=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-12,-18,4,7,horn,outline);pxo(g,8,-18,4,7,horn,outline);pxo(g,-7,-18,14,5,helm,outline);pxo(g,-6,-13,12,8,helmMid,outline);px(g,-3,-9,6,2,visor);pxo(g,-10,-4,20,6,helmMid,outline);pxo(g,-9,2,18,11,armor,outline);px(g,-7,5,14,2,pal.trim);pxo(g,-12,-1,4,10,helmMid,outline);pxo(g,8,-1,4,10,helmMid,outline);pxo(g,-6,10,4,5+walk,'#20242a',outline);pxo(g,2,10,4,6-walk,'#20242a',outline);px(g,-6,15+walk,4,2,steel);px(g,2,15-walk,4,2,steel)};
+  const drawUp=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-12,-18,4,7,horn,outline);pxo(g,8,-18,4,7,horn,outline);pxo(g,-7,-18,14,5,helm,outline);pxo(g,-6,-13,12,8,helm,outline);pxo(g,-11,-4,22,5,'#25292f',outline);pxo(g,-9,1,18,12,armor,outline);px(g,-7,5,14,2,pal.trim);pxo(g,-12,-1,4,10,helmMid,outline);pxo(g,8,-1,4,10,helmMid,outline);pxo(g,-6,10,4,5+walk,'#20242a',outline);pxo(g,2,10,4,6-walk,'#20242a',outline);px(g,-6,15+walk,4,2,steel);px(g,2,15-walk,4,2,steel)};
+  const drawSide=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-8,-18,4,7,horn,outline);pxo(g,-6,-18,13,5,helm,outline);pxo(g,-5,-13,11,8,helmMid,outline);px(g,1,-9,3,2,visor);pxo(g,-9,-4,18,6,helmMid,outline);pxo(g,-8,2,16,11,armor,outline);px(g,-5,5,10,2,pal.trim);pxo(g,7,-1,4,10,helmMid,outline);pxo(g,-6,10,4,5+walk,'#20242a',outline);pxo(g,0,10,4,6-walk,'#20242a',outline);px(g,-6,15+walk,4,2,steel);px(g,0,15-walk,4,2,steel)};
+  if(dir==='down'){drawDown();if(!hideWeapon)drawBlade()}else if(dir==='up'){drawUp();if(!hideWeapon)drawBlade()}else{g.save();if(dir==='left')g.scale(-1,1);drawSide();if(!hideWeapon)drawBlade();g.restore()}
+ };
+
+ const drawStorm=()=>{
+  const hatDark=pal.dark,hatMid=pal.mid,robe=pal.main,robeDark='#314052';
+  const drawDown=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-2,-27,4,6,hatDark,outline);pxo(g,-5,-22,10,5,hatMid,outline);pxo(g,-8,-17,16,4,hatDark,outline);pxo(g,-4,-12,8,7,pal.skin,outline);if(!blink){px(g,-1,-9,2,2,eye);px(g,1,-9,1,2,eye)}pxo(g,-11,-4,22,6,hatMid,outline);pxo(g,-10,2,20,14,robe,outline);px(g,-8,6,16,2,pal.trim);pxo(g,-12,0,4,11,robeDark,outline);pxo(g,8,0,4,11,robeDark,outline);pxo(g,-6,12,4,4+walk,robeDark,outline);pxo(g,2,12,4,5-walk,robeDark,outline);px(g,-6,16+walk,4,2,pal.metal);px(g,2,16-walk,4,2,pal.metal)};
+  const drawUp=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-2,-27,4,6,hatDark,outline);pxo(g,-5,-22,10,5,hatMid,outline);pxo(g,-8,-17,16,4,hatDark,outline);pxo(g,-6,-12,12,7,hatDark,outline);pxo(g,-12,-4,24,6,hatMid,outline);pxo(g,-10,1,20,15,robe,outline);px(g,-8,6,16,2,pal.trim);pxo(g,-12,0,4,11,robeDark,outline);pxo(g,8,0,4,11,robeDark,outline);pxo(g,-6,12,4,4+walk,robeDark,outline);pxo(g,2,12,4,5-walk,robeDark,outline);px(g,-6,16+walk,4,2,pal.metal);px(g,2,16-walk,4,2,pal.metal)};
+  const drawSide=()=>{drawPixelShadow(g,24,9,0,14);pxo(g,-1,-27,4,6,hatDark,outline);pxo(g,-5,-22,10,5,hatMid,outline);pxo(g,-10,-17,18,4,hatDark,outline);pxo(g,-4,-12,8,7,pal.skin,outline);if(!blink)px(g,1,-9,2,2,eye);pxo(g,-11,-4,22,6,hatMid,outline);pxo(g,-9,1,18,15,robe,outline);px(g,-6,6,12,2,pal.trim);pxo(g,8,0,4,11,robeDark,outline);pxo(g,-6,12,4,4+walk,robeDark,outline);pxo(g,0,12,4,5-walk,robeDark,outline);px(g,-6,16+walk,4,2,pal.metal);px(g,0,16-walk,4,2,pal.metal)};
+  if(dir==='down'){drawDown();if(!hideWeapon)drawStormStaff()}else if(dir==='up'){drawUp();if(!hideWeapon)drawStormStaff()}else{g.save();if(dir==='left')g.scale(-1,1);drawSide();if(!hideWeapon)drawStormStaff();g.restore()}
+  if(cast){px(g,-12,-22,2,2,pal.trim);px(g,-8,-26,2,2,pal.orb);px(g,6,-26,2,2,pal.orb);px(g,10,-22,2,2,pal.trim)}
+ };
+
+ if(key==='ranger'){drawRanger();drawBurnOverlay();g.restore();return}
+ if(key==='knight'){drawKnight();drawBurnOverlay();g.restore();return}
+ if(key==='storm'){drawStorm();drawBurnOverlay();g.restore();return}
+
  const drawDown=()=>{drawPixelShadow(g,22,8,0,13);pxo(g,-6,-16,12,4,pal.hair,outline);pxo(g,-5,-12,10,8,pal.skin,outline);if(!blink){px(g,-3,-8,2,2,eye);px(g,1,-8,2,2,eye)}pxo(g,-8,-4,16,5,pal.mid,outline);pxo(g,-7,-1,14,10,pal.main,outline);px(g,-5,2,10,2,pal.trim);pxo(g,-11,-2,3,8,pal.mid,outline);pxo(g,8,-2,3,8,pal.mid,outline);pxo(g,-6,9,4,5+walk,pal.dark,outline);pxo(g,2,9,4,6-walk,pal.dark,outline);px(g,-6,14+walk,4,2,pal.metal);px(g,2,14-walk,4,2,pal.metal)};
  const drawUp=()=>{drawPixelShadow(g,22,8,0,13);pxo(g,-6,-16,12,4,pal.hair,outline);pxo(g,-5,-12,10,8,pal.skin,outline);pxo(g,-9,-3,18,5,pal.dark,outline);pxo(g,-7,0,14,9,pal.main,outline);px(g,-5,3,10,2,pal.trim);pxo(g,-11,-2,3,8,pal.mid,outline);pxo(g,8,-2,3,8,pal.mid,outline);pxo(g,-6,9,4,5+walk,pal.dark,outline);pxo(g,2,9,4,6-walk,pal.dark,outline);px(g,-6,14+walk,4,2,pal.metal);px(g,2,14-walk,4,2,pal.metal)};
  const drawSide=()=>{drawPixelShadow(g,22,8,0,13);pxo(g,-5,-16,10,4,pal.hair,outline);pxo(g,-5,-12,10,8,pal.skin,outline);if(!blink)px(g,2,-8,2,2,eye);pxo(g,-7,-4,14,4,pal.mid,outline);pxo(g,-7,0,14,9,pal.main,outline);px(g,-4,3,8,2,pal.trim);pxo(g,6,-1,4,7,pal.mid,outline);pxo(g,-5,9,4,5+walk,pal.dark,outline);pxo(g,1,9,4,6-walk,pal.dark,outline);px(g,-5,14+walk,4,2,pal.metal);px(g,1,14-walk,4,2,pal.metal)};
@@ -1071,7 +1105,7 @@ function drawHeroModel(g,key,x,y,facing=0,scale=1,player=null){
  if(dir==='down'){drawDown();if(!hideWeapon)drawWeapon()} else if(dir==='up'){drawUp();if(!hideWeapon)drawWeapon()} else {g.save();if(dir==='left')g.scale(-1,1);drawSide();if(!hideWeapon)drawWeapon();g.restore()}
  if(key==='storm'&&cast){px(g,-12,-20,2,2,pal.trim);px(g,-8,-24,2,2,pal.orb);px(g,6,-24,2,2,pal.orb);px(g,10,-20,2,2,pal.trim)}
  if(key==='pyromancer'&&cast){px(g,-12,-20,2,2,pal.trim);px(g,-10,-24,2,2,pal.orb);px(g,8,-22,2,2,pal.orb)}
- if(player?.burn>0){const flick=Math.floor(performance.now()/90)%3;px(g,-11,5-flick,3,7,'#d14c2d');px(g,-8,1+flick,3,8,'#ff9a3d');px(g,8,4+flick,3,7,'#e45c2d');px(g,11,1-flick,2,6,'#ffc054')}
+ drawBurnOverlay();
  g.restore()}
 
 
@@ -1170,15 +1204,16 @@ function drawMountedKnight(g,p){
  leg(-8,10,intro?-rear:gait,false,false);
  leg(25,9,intro?rear:-gait,true,false);
  
- // cavaleiro encaixado na sela
- const riderLift=Math.round(rear);
- pxo(g,-1,-30-riderLift,15,13,metal,outline);px(g,2,-27-riderLift,10,4,'#efefec');
- pxo(g,1,-20-riderLift,12,12,cloth,outline);px(g,3,-17-riderLift,8,4,clothLight);
- pxo(g,-4,-18-riderLift,4,12,metal,outline);pxo(g,13,-18-riderLift,4,12,metal,outline);
- px(g,-4,-6-riderLift,5,13,cloth);px(g,10,-6-riderLift,5,13,cloth);
- pxo(g,2,-42-riderLift,10,10,'#ccb99f',outline);px(g,5,-39-riderLift,4,3,'#1a1717');
- pxo(g,0,-46-riderLift,15,5,metal,outline);px(g,4,-45-riderLift,7,2,'#f5f2eb');
- pxo(g,10,-43-riderLift,4,9,metal,outline);pxo(g,13,-38-riderLift,4,23,metal,outline);px(g,14,-42-riderLift,3,2,'#f8f4e7');
+ // cavaleiro encaixado na sela — armadura escura e elmo chifrudo
+ const riderLift=Math.round(rear),riderMetal='#48505a',riderMetalHi='#b8c1ca',riderCloth='#1b1f26',riderClothHi='#38404a',riderHorn='#b59c6d',riderVisor='#ba4f56';
+ pxo(g,-1,-30-riderLift,15,13,riderMetal,outline);px(g,2,-27-riderLift,10,4,riderMetalHi);
+ pxo(g,1,-20-riderLift,12,12,riderCloth,outline);px(g,3,-17-riderLift,8,4,riderClothHi);
+ pxo(g,-4,-18-riderLift,4,12,riderMetal,outline);pxo(g,13,-18-riderLift,4,12,riderMetal,outline);
+ px(g,-4,-6-riderLift,5,13,riderCloth);px(g,10,-6-riderLift,5,13,riderCloth);
+ pxo(g,2,-42-riderLift,10,10,riderMetal,outline);px(g,4,-39-riderLift,6,2,riderVisor);
+ pxo(g,-1,-45-riderLift,4,7,riderHorn,outline);pxo(g,11,-45-riderLift,4,7,riderHorn,outline);
+ pxo(g,0,-46-riderLift,15,5,riderMetal,outline);px(g,4,-45-riderLift,7,2,'#edf2f8');
+ pxo(g,10,-43-riderLift,4,9,riderMetal,outline);pxo(g,13,-38-riderLift,4,23,riderMetal,outline);px(g,14,-42-riderLift,3,2,'#f8f4e7');
  
  // relincho: boca, cabeça e linhas curtas, sem poluir a sprite
  if(intro){
@@ -2328,19 +2363,19 @@ enemySpawnPool(){
  calculateRunReward(){
   const wave=Math.max(1,Math.floor(Number(this.wave)||1)),kills=Math.max(0,Math.floor(Number(this.kills)||0)),level=Math.max(1,Math.floor(Number(this.level)||1)),treasures=Math.max(0,Math.floor(Number(this.treasuresCollected)||0));
   const parts={wave:Math.min(8,Math.max(0,wave-1)*.55),kills:Math.min(8,Math.sqrt(kills)*.28),level:Math.min(8,Math.max(0,level-1)*.32),treasures:Math.min(8,treasures*.70)};
-  const average=(parts.wave+parts.kills+parts.level+parts.treasures)/4,runes=clamp(Math.round(average),0,8);
+  const average=(parts.wave+parts.kills+parts.level+parts.treasures)/4,runes=clamp(Math.round(average*3.75),0,30);
   return{wave,kills,level,treasures,parts,average,runes,maxPart:8}
  }
  finishRun(reason='death'){
   if(this.over||!this.running)return this.runRewardBreakdown;
   this.clearScheduled();this.resetTransientUi();audio.clearDucks();this.over=true;this.paused=false;this.runEndReason=reason==='abandon'?'abandon':'death';audio.stopAllManaged(.08);audio.setDuck('gameover',true);input.reset();pauseScreen.classList.add('hidden');levelScreen.classList.add('hidden');treasureScreen.classList.add('hidden');$('#cardDraftScreen').classList.add('hidden');
   const reward=this.calculateRunReward();this.runRewardBreakdown=reward;if(!this.runRewardGranted){this.runRewardGranted=true;this.runRunes=0;if(reward.runes)this.awardRunes(reward.runes)}
-  const coinsLeft=this.coins;this.coins=0;this.updateKingmakerCoin?.(true);hud.classList.add('hidden');gameOverScreen.classList.remove('hidden');const abandoned=this.runEndReason==='abandon';gameOverScreen.classList.toggle('abandoned',abandoned);gameOverScreen.classList.toggle('defeated',!abandoned);
+  this.coins=0;this.updateKingmakerCoin?.(true);hud.classList.add('hidden');gameOverScreen.classList.remove('hidden');const abandoned=this.runEndReason==='abandon';gameOverScreen.classList.toggle('abandoned',abandoned);gameOverScreen.classList.toggle('defeated',!abandoned);
   $('#runResultKicker').textContent=abandoned?'Tentativa abandonada':'Fim da tentativa';$('#runResultTitle').textContent=abandoned?'Você Desistiu':'Você Morreu';$('#runResultReasonIcon').textContent=abandoned?'↩':'☠';
   $('#overSub').textContent=abandoned?'Você deixou a arena por conta própria. Tudo o que conquistou até aqui ainda entra no cálculo.':'As ruínas encerraram a tentativa, mas seu desempenho ainda rende progresso.';
   const diffLabel=this.diffKey==='brutal'?'Brutal':this.diffKey==='casual'?'Casual':'Normal';$('#resultDifficulty').textContent=diffLabel;$('#statTime').textContent=fmtTime(this.time);$('#resultScore').textContent=`${Math.round(this.score)} pts`;$('#statWave').textContent=reward.wave;$('#statKills').textContent=reward.kills;$('#statLevel').textContent=reward.level;$('#statTreasures').textContent=reward.treasures;$('#statRunes').textContent=reward.runes;
   const fmtPart=v=>`${v.toFixed(1).replace('.',',')} pts`,setPart=(id,bar,v)=>{$(id).textContent=fmtPart(v);$(bar).style.width=`${clamp(v/reward.maxPart*100,0,100)}%`};setPart('#runeWavePart','#perfWaveBar',reward.parts.wave);setPart('#runeKillsPart','#perfKillsBar',reward.parts.kills);setPart('#runeLevelPart','#perfLevelBar',reward.parts.level);setPart('#runeTreasuresPart','#perfTreasuresBar',reward.parts.treasures);
-  $('#runRewardFormula').textContent=`Média ${reward.average.toFixed(2).replace('.',',')} • máximo 8 runas por tentativa • ${coinsLeft} moedas restantes não são convertidas.`;
+  $('#runRewardFormula').textContent=`Média ${reward.average.toFixed(2).replace('.',',')} • máximo 30 runas por tentativa.`;
   const resultCanvas=$('#runResultHeroCanvas');if(resultCanvas)renderHeroPortrait(resultCanvas,this.heroKey);
   let oldBest=0;try{oldBest=Number(localStorage.getItem('hb-reforged2-best')||0)}catch(_){}const best=Math.max(oldBest,this.score);try{localStorage.setItem('hb-reforged2-best',best)}catch(_){}$('#resultBest').textContent=Math.round(best);updateMenuBest();this.refreshProgress();return reward
  }
