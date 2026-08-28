@@ -28,6 +28,7 @@
   let lastAckAt = null;
   let approvalOverlay = null;
   let pendingApproval = null;
+  let syncQueue = Promise.resolve();
 
   // Capturado antes de qualquer script do jogo rodar. Isso distingue um save real que já
   // existia ao abrir a página de dados-default/migrações criados durante o bootstrap.
@@ -139,8 +140,13 @@
   function comparePersistentProgress(remoteStorage) {
     if (typeof cfg.progressScore !== 'function') return 0;
     try {
-      const localScore = Number(cfg.progressScore(collectStorageValues()));
-      const remoteScore = Number(cfg.progressScore(remoteStorage));
+      const localRaw = cfg.progressScore(collectStorageValues());
+      const remoteRaw = cfg.progressScore(remoteStorage);
+      // Important: Number(null) === 0. A corrupted/invalid score must not magically
+      // become a valid zero and win/lose a Cloud conflict.
+      if (localRaw == null || remoteRaw == null) return 0;
+      const localScore = Number(localRaw);
+      const remoteScore = Number(remoteRaw);
       if (!Number.isFinite(localScore) || !Number.isFinite(remoteScore) || localScore === remoteScore) return 0;
       return remoteScore > localScore ? 1 : -1;
     } catch (error) {
@@ -173,33 +179,136 @@
     return remoteTime > localTime;
   }
 
-  function applySnapshot(payload) {
-    if (!payload || payload.gameId !== cfg.gameId || !payload.storage || typeof payload.storage !== 'object') return false;
-    if (snapshotsEqual(payload.storage)) return false;
-
-    let wrote = false;
+  function snapshotStorageValid(storage) {
+    if (!storage || typeof storage !== 'object' || Array.isArray(storage)) return false;
     for (const key of cfg.saveKeys) {
-      if (!Object.prototype.hasOwnProperty.call(payload.storage, key)) continue;
-      const value = payload.storage[key];
-      if (typeof value !== 'string') continue;
-      localStorage.setItem(key, value);
-      wrote = true;
+      if (!Object.prototype.hasOwnProperty.call(storage, key)) continue;
+      if (typeof storage[key] !== 'string') return false;
     }
-    if (!wrote) return false;
+    return true;
+  }
 
+  function restoreStorageBackup(backup) {
+    let ok = true;
+    for (const [key, value] of backup.entries()) {
+      try {
+        if (value === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, value);
+      } catch (error) {
+        ok = false;
+        console.error('[ZOINHO Bridge] Falha crítica ao restaurar rollback de storage.', key, error);
+      }
+    }
+    return ok;
+  }
+
+  function writeStorageTransaction(storage, updatedAt) {
+    if (!snapshotStorageValid(storage)) return { wrote: false, error: 'invalid-storage' };
+    const touched = [...cfg.saveKeys.filter(key => Object.prototype.hasOwnProperty.call(storage, key)), META_KEY];
+    const backup = new Map();
     try {
-      localStorage.setItem(META_KEY, JSON.stringify({
-        updatedAt: payload.clientUpdatedAt || payload.portalReceivedAt || new Date().toISOString()
-      }));
+      for (const key of touched) backup.set(key, localStorage.getItem(key));
+      let wrote = false;
+      for (const key of cfg.saveKeys) {
+        if (!Object.prototype.hasOwnProperty.call(storage, key)) continue;
+        const value = storage[key];
+        if (localStorage.getItem(key) !== value) {
+          localStorage.setItem(key, value);
+          wrote = true;
+        }
+      }
+      if (!wrote) return { wrote: false, error: null };
+      localStorage.setItem(META_KEY, JSON.stringify({ updatedAt: updatedAt || new Date().toISOString() }));
+      return { wrote: true, error: null };
     } catch (error) {
-      console.warn('[ZOINHO Bridge] Save remoto aplicado, mas metadata não pôde ser gravada.', error);
+      const rollbackOk = restoreStorageBackup(backup);
+      state = 'storage-error';
+      console.error('[ZOINHO Bridge] Snapshot abortado; rollback aplicado.', error);
+      return { wrote: false, error: rollbackOk ? 'storage-write-failed' : 'rollback-failed' };
     }
+  }
 
-    // O jogo carrega o save persistente no boot. Recarregar uma vez reconstrói o estado em memória
-    // usando o save restaurado sem empilhar patches no código original.
-    sessionStorage.setItem('zoinhoBridgeRestored', '1');
+  function mergeStorageSafely(primaryStorage, secondaryStorage) {
+    if (typeof cfg.mergeStorage !== 'function') return { ...(primaryStorage || {}) };
+    try {
+      const merged = cfg.mergeStorage(primaryStorage || {}, secondaryStorage || {});
+      return snapshotStorageValid(merged) ? merged : { ...(primaryStorage || {}) };
+    } catch (error) {
+      console.warn('[ZOINHO Bridge] Merge seguro falhou; mantendo timeline econômica vencedora.', error);
+      return { ...(primaryStorage || {}) };
+    }
+  }
+
+  function applySnapshot(payload) {
+    if (!payload || payload.gameId !== cfg.gameId || !snapshotStorageValid(payload.storage)) return false;
+    if (snapshotsEqual(payload.storage)) return false;
+    // Mark the reload before touching persistent data. If sessionStorage is unavailable,
+    // abort before the first write instead of leaving the in-memory game on another timeline.
+    try {
+      sessionStorage.setItem('zoinhoBridgeRestored', '1');
+    } catch (error) {
+      state = 'storage-error';
+      console.error('[ZOINHO Bridge] Não foi possível preparar o reload transacional.', error);
+      return false;
+    }
+    const tx = writeStorageTransaction(payload.storage, payload.clientUpdatedAt || payload.portalReceivedAt || new Date().toISOString());
+    if (!tx.wrote) {
+      try { sessionStorage.removeItem('zoinhoBridgeRestored'); } catch {}
+      return false;
+    }
+    // O jogo carrega o progresso persistente no boot. Recarregar uma vez reconstrói o
+    // estado em memória sem tentar fazer merge parcial de objetos vivos do jogo.
     location.reload();
     return true;
+  }
+
+  function runtimeIsReady() {
+    try { return typeof cfg.runtimeReady !== 'function' || cfg.runtimeReady() === true; }
+    catch { return false; }
+  }
+
+  function waitForRuntimeReady(timeoutMs = 3000) {
+    if (runtimeIsReady()) return Promise.resolve(true);
+    state = 'waiting-runtime';
+    return new Promise(resolve => {
+      const started = Date.now();
+      const check = () => {
+        if (runtimeIsReady()) return resolve(true);
+        if (Date.now() - started >= timeoutMs) return resolve(false);
+        setTimeout(check, 25);
+      };
+      check();
+    });
+  }
+
+  async function handleSync(message) {
+    await waitForRuntimeReady();
+    const restoredThisLoad = sessionStorage.getItem('zoinhoBridgeRestored') === '1';
+    if (restoredThisLoad) sessionStorage.removeItem('zoinhoBridgeRestored');
+
+    const remote = message.snapshot;
+    if (!restoredThisLoad && remote && remote.gameId === cfg.gameId && snapshotStorageValid(remote.storage)) {
+      const localStorageValues = collectStorageValues();
+      const remoteWins = shouldApplyRemote(remote);
+      // Never splice economies together. Only cfg.mergeStorage's monotonic data (record,
+      // bestiary, tutorial/seen flags) may cross timelines.
+      const winnerStorage = remoteWins ? remote.storage : localStorageValues;
+      const otherStorage = remoteWins ? localStorageValues : remote.storage;
+      const mergedStorage = mergeStorageSafely(winnerStorage, otherStorage);
+      const mergedPayload = {
+        ...remote,
+        gameId: cfg.gameId,
+        storage: mergedStorage,
+        clientUpdatedAt: remoteWins
+          ? (remote.clientUpdatedAt || remote.portalReceivedAt || new Date().toISOString())
+          : (readMeta().updatedAt || new Date().toISOString())
+      };
+      if (!snapshotsEqual(mergedStorage) && applySnapshot(mergedPayload)) return;
+    }
+
+    initialSyncCompleted = true;
+    state = 'connected';
+    pushNow(queuedPushReason || 'sync-response');
   }
 
   function post(type, payload = {}) {
@@ -437,14 +546,10 @@
     if (!sessionNonce || message.nonce !== sessionNonce) return;
 
     if (message.type === 'sync') {
-      const restoredThisLoad = sessionStorage.getItem('zoinhoBridgeRestored') === '1';
-      if (restoredThisLoad) sessionStorage.removeItem('zoinhoBridgeRestored');
-
-      if (!restoredThisLoad && message.snapshot && shouldApplyRemote(message.snapshot)) {
-        if (applySnapshot(message.snapshot)) return;
-      }
-      initialSyncCompleted = true;
-      pushNow(queuedPushReason || 'sync-response');
+      syncQueue = syncQueue.then(() => handleSync(message)).catch(error => {
+        state = 'error';
+        console.error('[ZOINHO Bridge] Falha durante sincronização serializada.', error);
+      });
       return;
     }
 
