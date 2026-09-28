@@ -1503,8 +1503,60 @@ body:not(.ui-narrow) #menuScreen .menu-shell{grid-template-columns:clamp(228px,v
 @media(max-width:900px){.settings-tile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-damage-tile{grid-column:1/-1}.settings-keybind-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:620px){.settings-nav-btn{min-height:43px}.settings-nav-btn b{font-size:7px}.settings-page{padding:8px}.settings-tile-grid,.settings-audio-board{grid-template-columns:1fr}.settings-damage-tile{grid-column:auto;grid-template-columns:1fr}.settings-damage-tile .settings-tile-head{grid-column:auto}.damage-marker-preview{grid-row:auto;min-height:92px}.settings-keybind-grid,.pause-settings-view .settings-keybind-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.settings-control-footer{align-items:stretch;flex-direction:column}.settings-control-footer .pixel-btn{width:100%}}
 </style>
+
+<script id="zoinhoCloudBootPrimer">
+(() => {
+  try {
+    if (new URLSearchParams(location.search).get('zoinhoBridge') === '1') {
+      document.documentElement.classList.add('zoinho-cloud-booting');
+    }
+  } catch {}
+})();
+</script>
+<style id="zoinhoCloudBootStyle">
+  html.zoinho-cloud-booting{overflow:hidden!important}
+  #zoinhoCloudBoot{display:none;position:fixed;inset:0;z-index:2147483000;place-items:center;padding:24px;background:radial-gradient(circle at 50% 34%,rgba(202,166,79,.12),transparent 34%),linear-gradient(180deg,#080a0b 0%,#0d1113 100%);color:#e8e0cf;font-family:"Courier New",monospace;opacity:1;transition:opacity .18s ease;isolation:isolate}
+  html.zoinho-cloud-booting #zoinhoCloudBoot{display:grid}
+  #zoinhoCloudBoot.zoinho-cloud-boot-leaving{opacity:0;pointer-events:none}
+  #zoinhoCloudBoot::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(202,166,79,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(202,166,79,.025) 1px,transparent 1px);background-size:24px 24px;mask-image:linear-gradient(to bottom,transparent,black 18%,black 82%,transparent)}
+  #zoinhoCloudBoot .zcb-card{position:relative;width:min(540px,92vw);padding:29px 27px 25px;border:3px solid #514c41;background:linear-gradient(160deg,#171c1e,#0c1012);box-shadow:6px 6px 0 #030405,0 24px 80px rgba(0,0,0,.62),inset 0 0 0 1px #232925;text-align:center}
+  #zoinhoCloudBoot .zcb-mark{width:58px;height:58px;margin:0 auto 17px;display:grid;place-items:center;border:3px solid #6a5b35;background:#1d1c16;box-shadow:4px 4px 0 #050607;color:#e0b95e;font-size:25px;font-weight:900}
+  #zoinhoCloudBoot[data-stage="done"] .zcb-mark,#zoinhoCloudBoot[data-stage="offline"] .zcb-mark{color:#8fd69b;border-color:#456b4d;background:#142018}
+  #zoinhoCloudBoot[data-stage="error"] .zcb-mark{color:#ed7a7a;border-color:#753a3a;background:#241414}
+  #zoinhoCloudBoot .zcb-kicker{margin-bottom:8px;color:#caa64f;font-size:9px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}
+  #zoinhoCloudBoot h2{margin:0;color:#f0d58a;font-size:clamp(20px,4vw,29px);line-height:1.16;text-transform:uppercase;text-shadow:3px 3px 0 #15130d}
+  #zoinhoCloudBoot p{min-height:42px;margin:12px auto 19px;max-width:430px;color:#969185;font-size:11px;line-height:1.6}
+  #zoinhoCloudBoot .zcb-loader{height:5px;overflow:hidden;border:2px solid #30322e;background:#080a0b}
+  #zoinhoCloudBoot .zcb-loader>span{display:block;width:38%;height:100%;background:linear-gradient(90deg,transparent,#8c7337,#e0b95e,#8c7337,transparent);animation:zcbSweep 1.05s steps(12,end) infinite}
+  #zoinhoCloudBoot[data-stage="done"] .zcb-loader>span,#zoinhoCloudBoot[data-stage="offline"] .zcb-loader>span{width:100%;animation:none;background:#5ca66d}
+  #zoinhoCloudBoot[data-stage="error"] .zcb-loader>span{width:100%;animation:none;background:#b94d52}
+  #zoinhoCloudBoot .zcb-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:19px}
+  #zoinhoCloudBoot button[hidden]{display:none!important}
+  #zoinhoCloudBoot button{min-height:39px;border:2px solid #45483f;padding:10px 14px;background:#111517;color:#c9c1b0;font:900 9px/1 "Courier New",monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:2px 2px 0 #050607}
+  #zoinhoCloudBoot button[data-primary]{border-color:#8d753d;background:#282314;color:#f0d58a}
+  #zoinhoCloudBoot .zcb-foot{margin-top:14px;color:#66675f;font-size:8px;line-height:1.5;letter-spacing:.05em;text-transform:uppercase}
+  @keyframes zcbSweep{0%{transform:translateX(-130%)}100%{transform:translateX(350%)}}
+  @media (prefers-reduced-motion:reduce){#zoinhoCloudBoot,#zoinhoCloudBoot .zcb-loader>span{transition:none!important;animation:none!important}}
+</style>
+
 </head>
 <body>
+
+<div id="zoinhoCloudBoot" data-stage="connecting" role="status" aria-live="polite" aria-busy="true">
+  <div class="zcb-card">
+    <div class="zcb-mark" id="zoinhoCloudBootStatus">◆</div>
+    <div class="zcb-kicker">ZOINHO CLOUD · HEROES BATTLE</div>
+    <h2 id="zoinhoCloudBootTitle">Sincronizando progresso...</h2>
+    <p id="zoinhoCloudBootDetail">Conectando à sua conta ZOINHO.</p>
+    <div class="zcb-loader" aria-hidden="true"><span></span></div>
+    <div class="zcb-actions">
+      <button id="zoinhoCloudRetry" type="button" data-primary hidden>Tentar novamente</button>
+      <button id="zoinhoCloudOffline" type="button" hidden>Jogar com save local</button>
+    </div>
+    <div class="zcb-foot">Runas, cartas, heróis, dimensões, bestiário e Ascensões permanecem protegidos no save local.</div>
+  </div>
+</div>
+
 <canvas id="game"></canvas>
 <div id="damageFlash"></div>
 <div id="bossImpactFlash"></div>
@@ -1854,8 +1906,8 @@ body:not(.ui-narrow) #menuScreen .menu-shell{grid-template-columns:clamp(228px,v
   </div>
 </section>
 
-<script src="zoinho-storage-config.js?v=cloud-1.6.0"></script>
-<script src="zoinho-storage-bridge.js?v=cloud-1.6.0"></script>
+<script src="zoinho-storage-config.js?v=cloud-1.7.0"></script>
+<script src="zoinho-storage-bridge.js?v=cloud-1.7.0"></script>
 <script>
 
 
@@ -17114,7 +17166,7 @@ window.__HB_V1795_DEEP_REVIEW_AUDIT=()=>{
  };
 };
 
-window.__HB_GAME=game;window.__HB_AUDIO=audio;window.__HB_MASTERY=MASTERY_UPGRADES;window.__HB_MASTERY_RULES={maxLevel:MASTERY_MAX_LEVEL,needs:[...MASTERY_NEEDS]};window.__HB_RUNE_ECONOMY_AUDIT=()=>{const cardCosts=Array.from({length:CARD_INVENTORY_LIMIT},(_,i)=>heroCardDraftCost(i)),treeTotals=Object.fromEntries(Object.entries(SKILL_TREES).map(([k,v])=>[k,v.reduce((sum,n)=>sum+(Number(n.cost)||0),0)])),ascCosts=Object.fromEntries(Object.entries(ASCENSION_TREES).map(([k,v])=>[k,{xp:v.reduce((a,n)=>a+(n.xp||0),0),rubies:v.reduce((a,n)=>a+(n.rubies||0),0)}]));return{version:window.__HB_VERSION,config:{caps:{...RUNE_ECONOMY_CONFIG.caps},difficultyMul:{...RUNE_ECONOMY_CONFIG.difficultyMul},depthMul:{...RUNE_ECONOMY_CONFIG.depthMul},rate:RUNE_ECONOMY_CONFIG.rate,maxPart:RUNE_ECONOMY_CONFIG.maxPart,wavesPerDimension:RUNE_ECONOMY_CONFIG.wavesPerDimension},run:{dimension:economyWorldIndex(game),localWave:game.wave,progressionWave:economyProgressWave(game),depthMul:economyDepthMultiplier(game),treasuresDimension:game.treasuresCollected||0,treasuresRun:game.runTreasuresCollected||0,reward:game.calculateRunReward()},heroUnlocks:{...HERO_UNLOCK_COSTS},skillTreeTotals:treeTotals,skillTreeNodes:Object.fromEntries(Object.entries(SKILL_TREES).map(([k,v])=>[k,v.length])),cards:{inventoryCap:CARD_INVENTORY_LIMIT,buyCostsFirstFive:cardCosts,totalFirstFive:cardCosts.reduce((a,b)=>a+b,0),resaleRate:CARD_RESALE_RATE},ascension:ascCosts,ruby:{bossExpectedPerKill:.68,bossDropChance:.60,bossDoubleChance:.08,ritualCostsFirstSix:Array.from({length:6},(_,i)=>ascensionRubyCostForCount(i))},pricing:{starterChestStep:Math.max(0,economyProgressWave(game)-1)*5,merchantProgressWave:economyProgressWave(game)},guards:{runRewardGranted:game.runRewardGranted,rubyTravelBank:Game.prototype.beginDimensionTravel.toString().includes('securePortalRubyPickups'),rubyMagnet:Pickup.prototype.update.toString().includes("this.type==='ruby'"),runBuffPersistence:Game.prototype.rebuildPlayerForDimension.toString().includes('reapplyDimensionalRunBuffs'),bargainProgression:Game.prototype.chooseDimensionalChoice.toString().includes('economyProgressWave(this)*.25')}};};window.__HB_BESTIARY=BESTIARY_ENTRIES;window.__HB_BESTIARY_CLASSES=BESTIARY_CLASSES;window.__HB_BESTIARY_UI={refresh:refreshBestiary,openDetail:openBestiaryDetail,closeDetail:closeBestiaryDetail,setClass:(c)=>{activeBestiaryClass=c;refreshBestiary()}};window.__HB_CARD_DECKS=CARD_DECKS;window.__HB_PROGRESS_RULES={HERO_UNLOCK_COSTS,SKILL_TREES,CLASS_TALENTS};window.__HB_MENU_AUDIT=()=>{const ids=[...document.querySelectorAll('[id]')].map(e=>e.id),duplicates=ids.filter((id,i)=>ids.indexOf(id)!==i);return{version:window.__HB_VERSION,activePanel:document.querySelector('[data-menu-panel].active')?.dataset.menuPanel||null,tabs:document.querySelectorAll('[data-menu-panel-target]').length,panels:document.querySelectorAll('[data-menu-panel]').length,heroCards:document.querySelectorAll('.hero-card').length,portraitReady:document.querySelectorAll('.hero-portrait.portrait-ready').length,portraitFallback:document.querySelectorAll('.hero-preview.portrait-fallback').length,skillNodes:document.querySelectorAll('.skill-node').length,rosterButtons:document.querySelectorAll('.progress-roster-button').length,cardCapacity:document.querySelectorAll('#cardCapacityPips i').length,activeDeck:activeUpgradeHero,deckCards:CARD_DECKS[activeUpgradeHero]?.length||0,catalogCards:document.querySelectorAll('#cardCatalogGrid .catalog-card').length,catalogOpen:!$('#cardCatalogOverlay').classList.contains('hidden'),duplicates}};
+window.__HB_GAME=game;window.__HB_AUDIO=audio;window.__HB_MASTERY=MASTERY_UPGRADES;window.__HB_MASTERY_RULES={maxLevel:MASTERY_MAX_LEVEL,needs:[...MASTERY_NEEDS]};window.__HB_RUNE_ECONOMY_AUDIT=()=>{const cardCosts=Array.from({length:CARD_INVENTORY_LIMIT},(_,i)=>heroCardDraftCost(i)),treeTotals=Object.fromEntries(Object.entries(SKILL_TREES).map(([k,v])=>[k,v.reduce((sum,n)=>sum+(Number(n.cost)||0),0)])),ascCosts=Object.fromEntries(Object.entries(ASCENSION_TREES).map(([k,v])=>[k,{xp:v.reduce((a,n)=>a+(n.xp||0),0),rubies:v.reduce((a,n)=>a+(n.rubies||0),0)}]));return{version:window.__HB_VERSION,config:{caps:{...RUNE_ECONOMY_CONFIG.caps},difficultyMul:{...RUNE_ECONOMY_CONFIG.difficultyMul},depthMul:{...RUNE_ECONOMY_CONFIG.depthMul},rate:RUNE_ECONOMY_CONFIG.rate,maxPart:RUNE_ECONOMY_CONFIG.maxPart,wavesPerDimension:RUNE_ECONOMY_CONFIG.wavesPerDimension},run:{dimension:economyWorldIndex(game),localWave:game.wave,progressionWave:economyProgressWave(game),depthMul:economyDepthMultiplier(game),treasuresDimension:game.treasuresCollected||0,treasuresRun:game.runTreasuresCollected||0,reward:game.calculateRunReward()},heroUnlocks:{...HERO_UNLOCK_COSTS},skillTreeTotals:treeTotals,skillTreeNodes:Object.fromEntries(Object.entries(SKILL_TREES).map(([k,v])=>[k,v.length])),cards:{inventoryCap:CARD_INVENTORY_LIMIT,buyCostsFirstFive:cardCosts,totalFirstFive:cardCosts.reduce((a,b)=>a+b,0),resaleRate:CARD_RESALE_RATE},ascension:ascCosts,ruby:{bossExpectedPerKill:.68,bossDropChance:.60,bossDoubleChance:.08,ritualCostsFirstSix:Array.from({length:6},(_,i)=>ascensionRubyCostForCount(i))},pricing:{starterChestStep:Math.max(0,economyProgressWave(game)-1)*5,merchantProgressWave:economyProgressWave(game)},guards:{runRewardGranted:game.runRewardGranted,rubyTravelBank:Game.prototype.beginDimensionTravel.toString().includes('securePortalRubyPickups'),rubyMagnet:Pickup.prototype.update.toString().includes("this.type==='ruby'"),runBuffPersistence:Game.prototype.rebuildPlayerForDimension.toString().includes('reapplyDimensionalRunBuffs'),bargainProgression:Game.prototype.chooseDimensionalChoice.toString().includes('economyProgressWave(this)*.25')}};};window.__HB_BESTIARY=BESTIARY_ENTRIES;window.__HB_BESTIARY_CLASSES=BESTIARY_CLASSES;window.__HB_BESTIARY_UI={refresh:refreshBestiary,openDetail:openBestiaryDetail,closeDetail:closeBestiaryDetail,setClass:(c)=>{activeBestiaryClass=c;refreshBestiary()}};window.__HB_CARD_DECKS=CARD_DECKS;window.__HB_PROGRESS_RULES={HERO_UNLOCK_COSTS,SKILL_TREES,CLASS_TALENTS,ASCENSION_TREES,ASCENSION_XP_REWARD,ASCENSION_MIN_SKILL_NODES,ascensionRubyCostForCount};window.__HB_MENU_AUDIT=()=>{const ids=[...document.querySelectorAll('[id]')].map(e=>e.id),duplicates=ids.filter((id,i)=>ids.indexOf(id)!==i);return{version:window.__HB_VERSION,activePanel:document.querySelector('[data-menu-panel].active')?.dataset.menuPanel||null,tabs:document.querySelectorAll('[data-menu-panel-target]').length,panels:document.querySelectorAll('[data-menu-panel]').length,heroCards:document.querySelectorAll('.hero-card').length,portraitReady:document.querySelectorAll('.hero-portrait.portrait-ready').length,portraitFallback:document.querySelectorAll('.hero-preview.portrait-fallback').length,skillNodes:document.querySelectorAll('.skill-node').length,rosterButtons:document.querySelectorAll('.progress-roster-button').length,cardCapacity:document.querySelectorAll('#cardCapacityPips i').length,activeDeck:activeUpgradeHero,deckCards:CARD_DECKS[activeUpgradeHero]?.length||0,catalogCards:document.querySelectorAll('#cardCatalogGrid .catalog-card').length,catalogOpen:!$('#cardCatalogOverlay').classList.contains('hidden'),duplicates}};
 window.__HB_V1746_AUDIT=()=>({version:window.__HB_VERSION,absalon:{version:window.__ABSALON_REWORK_V4__?.version||null,directors:window.__ABSALON_REWORK_V4__?.attacks?.length||0,fieldTypes:window.__ABSALON_REWORK_V4__?.customFieldTypes?.length||0},archive:{activeHero:activeUpgradeHero,activeTab:activeUpgradeTab,tabs:[...document.querySelectorAll('[data-upgrade-tab]')].map(b=>({id:b.dataset.upgradeTab,disabled:b.disabled,active:b.classList.contains('active')})),demos:Object.fromEntries(Object.entries(heroAbilityDemos).map(([k,d])=>[k,d?{hero:d.key,playing:d.playing,age:+d.age.toFixed(2)}:null]))},selection:{heroes:document.querySelectorAll('.hero-card').length,locked:document.querySelectorAll('.hero-card.locked').length,lockCanvases:document.querySelectorAll('.hero-lock-canvas').length,unlockToastVisible:!$('#heroUnlockToast').classList.contains('hidden')},bossName:$('#bossName').textContent,duplicateIds:(()=>{const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);return ids.filter((id,i)=>ids.indexOf(id)!==i)})()});
 
 // V17.53 — perfil responsivo calculado pelo viewport real (inclui zoom/visualViewport).
