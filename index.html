@@ -1906,8 +1906,8 @@ body:not(.ui-narrow) #menuScreen .menu-shell{grid-template-columns:clamp(228px,v
   </div>
 </section>
 
-<script src="zoinho-storage-config.js?v=cloud-1.8.0-shell"></script>
-<script src="zoinho-storage-bridge.js?v=cloud-1.8.0-shell"></script>
+<script src="zoinho-storage-config.js?v=cloud-1.8.1-shell-audio"></script>
+<script src="zoinho-storage-bridge.js?v=cloud-1.8.1-shell-audio"></script>
 <script>
 
 
@@ -2756,7 +2756,7 @@ class AudioManager{
  pickNextMenuIndex(current=-1){const pool=this.allMenu();if(pool.length<=1)return 0;let next=irand(0,pool.length-1);if(next===current)next=(next+1+irand(0,pool.length-2))%pool.length;return next}
  playMenuIndex(index,fadeIn=true){const pool=this.allMenu();if(!pool.length)return;this.menuIndex=((Math.floor(index)||0)%pool.length+pool.length)%pool.length;for(const a of pool)if(a!==pool[this.menuIndex])this.stopMusic(a,true);const a=pool[this.menuIndex];this.currentMusic=a;try{a.currentTime=0}catch(_){}a.volume=fadeIn?0:this.targetMusicVolume();this.safePlay(a);if(fadeIn)this.fade(a,this.targetMusicVolume(),.65,0)}
  gameplayPool(worldId=this.gameplayWorldId){return this.music.gameplayByWorld?.[worldId]||this.music.gameplayByWorld?.dimension_1||[]}
- unlock(){if(this.unlocked)return;this.unlocked=true;for(const a of [...this.allMenu(),this.music.boss,...this.allGameplay()]){try{a.load()}catch(_){}}queueMicrotask(()=>this.syncBaseMode())}
+ unlock(){const first=!this.unlocked;this.unlocked=true;if(first)for(const a of [...this.allMenu(),this.music.boss,...this.allGameplay()]){try{a.load()}catch(_){}}queueMicrotask(()=>this.syncBaseMode())}
  targetMusicVolume(){return this.musicVolume*(this.duckReasons.size ? .28 : 1)}
  fade(a,target,duration=.55,from=null){if(!a)return;const serial=(this.fadeTokens.get(a)||0)+1;this.fadeTokens.set(a,serial);const start=from==null?a.volume:from,t0=performance.now();a.volume=clamp(start,0,1);const step=now=>{if(this.fadeTokens.get(a)!==serial)return;const p=clamp((now-t0)/(duration*1000),0,1),e=1-Math.pow(1-p,3);a.volume=clamp(lerp(start,target,e),0,1);if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
  safePlay(a){if(!this.unlocked||!a)return;try{const p=a.play();if(p&&p.catch)p.catch(()=>{})}catch(_){}}
@@ -2795,6 +2795,8 @@ Object.assign(AUDIO_ASSETS.sfx,{
 const PLAYER_DEATH_AUDIO_DURATION=2.481625;
 const hbDeathEase=v=>{v=clamp(v,0,1);return v*v*(3-2*v)};
 const audio=new AudioManager();
+const ZOINHO_SHELL_AUTOPLAY=new URLSearchParams(location.search).get('zoinhoShell')==='1'&&new URLSearchParams(location.search).get('zoinhoAutoplay')==='1';
+if(ZOINHO_SHELL_AUTOPLAY)queueMicrotask(()=>audio.unlock());
 
 class Input{
  constructor(){this.keys=new Set();this.pressed=new Set();this.mouse={x:0,y:0,down:false};addEventListener('keydown',e=>{const k=normalizeKey(e.key);if(!k)return;if(!this.keys.has(k))this.pressed.add(k);this.keys.add(k);const map=window.__HB_GAME?.settings?.keybinds||DEFAULT_KEYBINDS,bound=KEYBIND_ACTIONS.some(a=>bindingValue(map,a)===k);if([' ','arrowup','arrowdown','arrowleft','arrowright','tab'].includes(k)||bound)e.preventDefault()},{passive:false});addEventListener('keyup',e=>this.keys.delete(normalizeKey(e.key)));canvas.addEventListener('pointermove',e=>{this.mouse.x=e.clientX;this.mouse.y=e.clientY});canvas.addEventListener('pointerdown',e=>{if(e.button===0)this.mouse.down=true});addEventListener('pointerup',e=>{if(e.button===0)this.mouse.down=false});canvas.addEventListener('contextmenu',e=>e.preventDefault())}
